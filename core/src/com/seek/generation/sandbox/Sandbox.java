@@ -17,32 +17,41 @@ import java.util.Map;
 
 public class Sandbox extends ApplicationAdapter {
 
-	private PerspectiveCamera camera;
-	private FirstPersonCameraController cameraController;
-	private ModelBatch batch;
-	private AssetManager assetManager;
+    private PerspectiveCamera camera;
+    private FirstPersonCameraController cameraController;
+    private ModelBatch batch;
+    private AssetManager assetManager;
 
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+    private Array<ModelInstance> instances = new Array<ModelInstance>();
 
-	private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
+    private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
     private HashMap<String, Boolean> modelQueToRemove = new HashMap<String, Boolean>();
-	private HashMap<String, Model> loadedModels = new HashMap<String, Model>();
+    private HashMap<String, Model> loadedModels = new HashMap<String, Model>();
 
-	@Override
-	public void create () {
+    @Override
+    public void create() {
         Gdx.gl.glClearColor(0.5f, 0.8f, 0.9f, 1);
-	    camera = new PerspectiveCamera(70, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-	    cameraController = new FirstPersonCameraController(camera);
-	    batch = new ModelBatch();
+        camera = new PerspectiveCamera(70, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cameraController = new FirstPersonCameraController(camera);
+        batch = new ModelBatch();
         assetManager = new AssetManager();
 
-	    camera.near = 0.1f;
-	    camera.far = 5000f;
-	    camera.update();
+        camera.near = 0.1f;
+        camera.far = 5000f;
+        camera.update();
 
-	    Gdx.input.setInputProcessor(cameraController);
-	            modelQue.put(ModelList.MODEL_BOX.get(), false);
-	}
+        Gdx.input.setInputProcessor(cameraController);
+        loadModel(ModelList.MODEL_BOX);
+        loadModel(ModelList.MODEL_RUST_CUBE);
+    }
+
+    private void loadModel(ModelList model){
+        modelQue.put(model.get(), false);
+    }
+
+    private Model getModel(ModelList model) {
+        return loadedModels.get(model.get());
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -50,16 +59,11 @@ public class Sandbox extends ApplicationAdapter {
         camera.viewportHeight = height;
     }
 
-    private Model getModel(String model){
-        return loadedModels.get(model);
-    }
-
-    private void handleLoading()
-    {
+    private void handleLoading() {
         //checks if value is false, if false then asset manager needs to load the model if true then
         //the asset manager has already started loading the model and if true we will check if it
         //has finished loading then if isLoaded returns true we add it to the loaded models array
-        for(Map.Entry<String, Boolean> entry : modelQue.entrySet()) {
+        for (Map.Entry<String, Boolean> entry : modelQue.entrySet()) {
             if (entry.getValue() == false) {
                 assetManager.load(entry.getKey(), Model.class);
                 entry.setValue(true);
@@ -73,8 +77,8 @@ public class Sandbox extends ApplicationAdapter {
             }
         }
 
-        for(Map.Entry<String, Boolean> entry : modelQueToRemove.entrySet()){
-            if(modelQue.get(entry.getKey())){
+        for (Map.Entry<String, Boolean> entry : modelQueToRemove.entrySet()) {
+            if (modelQue.get(entry.getKey())) {
                 modelQue.remove(entry.getKey());
             }
         }
@@ -82,37 +86,46 @@ public class Sandbox extends ApplicationAdapter {
     }
 
     @Override
-	public void render () {
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		Gdx.graphics.setTitle("FPS: " + Gdx.graphics.getFramesPerSecond() + " Instances: " + instances.size);
+    public void render() {
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        Gdx.graphics.setTitle("FPS: " + Gdx.graphics.getFramesPerSecond() + " Instances: " + instances.size);
 
-		if(!assetManager.update()){
-		    //display a loading screen/bar
+        if (!assetManager.update()) {
+            //display a loading screen/bar
         }
 
-       handleLoading();
+        handleLoading();
 
-		if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
-		    Model model = getModel(ModelList.MODEL_BOX.get());
-		    if(model != null){
-		        ModelInstance instance = new ModelInstance(model);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            Model model = getModel(ModelList.MODEL_BOX);
+            if (model != null) {
+                ModelInstance instance = new ModelInstance(model);
 
-		        instances.add(instance);
+                instances.add(instance);
             }
         }
 
-		cameraController.update();
+        if(Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            Model model = getModel(ModelList.MODEL_RUST_CUBE);
+            if(model != null){
+                ModelInstance instance = new ModelInstance(model);
+                instance.transform.setToTranslation(-5, -5, -5);
+                instances.add(instance);
+            }
+        }
 
-		batch.begin(camera);
+        cameraController.update();
+
+        batch.begin(camera);
         {
             batch.render(instances);
         }
-		batch.end();
-	}
-	
-	@Override
-	public void dispose () {
-		batch.dispose();
+        batch.end();
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
         assetManager.dispose();
-	}
+    }
 }
