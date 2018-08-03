@@ -4,11 +4,17 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.utils.Array;
 
@@ -21,6 +27,7 @@ public class Sandbox extends ApplicationAdapter {
     private FirstPersonCameraController cameraController;
     private ModelBatch batch;
     private AssetManager assetManager;
+    private Environment environment;
 
     private Array<ModelInstance> instances = new Array<ModelInstance>();
 
@@ -35,10 +42,17 @@ public class Sandbox extends ApplicationAdapter {
         cameraController = new FirstPersonCameraController(camera);
         batch = new ModelBatch();
         assetManager = new AssetManager();
+        environment = new Environment();
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
         camera.near = 0.1f;
         camera.far = 5000f;
         camera.update();
+
+        assetManager.setLoader(Texture.class, new TextureLoaderDefault(new InternalFileHandleResolver()));
 
         Gdx.input.setInputProcessor(cameraController);
         loadModel(ModelList.MODEL_BOX);
@@ -118,7 +132,7 @@ public class Sandbox extends ApplicationAdapter {
 
         batch.begin(camera);
         {
-            batch.render(instances);
+            batch.render(instances, environment);
         }
         batch.end();
     }
