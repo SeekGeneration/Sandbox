@@ -30,6 +30,7 @@ public class Sandbox extends ApplicationAdapter {
     private Environment environment;
 
     private Array<ModelInstance> instances = new Array<ModelInstance>();
+    private ModelInstance floorInstance = null;
 
     private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
     private HashMap<String, Boolean> modelQueToRemove = new HashMap<String, Boolean>();
@@ -49,12 +50,15 @@ public class Sandbox extends ApplicationAdapter {
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
         camera.near = 0.1f;
-        camera.far = 5000f;
+        camera.far = 50000f;
+        camera.position.set(0, 5, 0);
         camera.update();
+        cameraController.setVelocity(50);
 
         assetManager.setLoader(Texture.class, new TextureLoaderDefault(new InternalFileHandleResolver()));
 
         Gdx.input.setInputProcessor(cameraController);
+        loadModel(ModelList.MODEL_FLOOR);
         loadModel(ModelList.MODEL_BOX);
         loadModel(ModelList.MODEL_RUST_CUBE);
     }
@@ -99,22 +103,12 @@ public class Sandbox extends ApplicationAdapter {
         modelQueToRemove.clear();
     }
 
-    @Override
-    public void render() {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        Gdx.graphics.setTitle("FPS: " + Gdx.graphics.getFramesPerSecond() + " Instances: " + instances.size);
-
-        if (!assetManager.update()) {
-            //display a loading screen/bar
-        }
-
-        handleLoading();
-
+    private void handleInput()
+    {
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             Model model = getModel(ModelList.MODEL_BOX);
             if (model != null) {
                 ModelInstance instance = new ModelInstance(model);
-
                 instances.add(instance);
             }
         }
@@ -125,6 +119,28 @@ public class Sandbox extends ApplicationAdapter {
                 ModelInstance instance = new ModelInstance(model);
                 instance.transform.setToTranslation(-5, -5, -5);
                 instances.add(instance);
+
+            }
+        }
+    }
+
+    @Override
+    public void render() {
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        Gdx.graphics.setTitle("FPS: " + Gdx.graphics.getFramesPerSecond() + " Instances: " + instances.size);
+
+        if (!assetManager.update()) {
+            //display a loading screen/bar
+        }
+
+        handleLoading();
+        handleInput();
+
+        if(floorInstance == null){
+            Model model = getModel(ModelList.MODEL_FLOOR);
+            if(model != null){
+                floorInstance = new ModelInstance(model);
+                instances.add(floorInstance);
             }
         }
 
@@ -132,7 +148,9 @@ public class Sandbox extends ApplicationAdapter {
 
         batch.begin(camera);
         {
-            batch.render(instances, environment);
+            for(int i = instances.size - 1; i >= 0; i--) {
+                batch.render(instances.get(i), environment);
+            }
         }
         batch.end();
     }

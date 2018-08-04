@@ -1,5 +1,8 @@
 ## Java
 
+/android/assets/data/
+/desktop/src/com/seek/generation/sandbox/desktop/examples/
+
 *.class
 *.war
 *.ear
