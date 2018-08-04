@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -30,7 +32,7 @@ public class ModelListView extends Table{
     private ScrollPane scroll;
     private CollapsibleWidget collapsibleWidget;
 
-    private Vector3 vector3 = new Vector3();
+    private ButtonGroup buttonGroup;
 
     public ModelListView() {
         super();
@@ -39,6 +41,7 @@ public class ModelListView extends Table{
         scroll = new ScrollPane(rootTable);
         collapsibleTable = new Table();
         collapsibleWidget = new CollapsibleWidget(collapsibleTable);
+        buttonGroup = new ButtonGroup();
 
         models.addListener(new ChangeListener() {
             public void changed(ChangeEvent event, Actor actor) {
@@ -53,32 +56,49 @@ public class ModelListView extends Table{
         rootTable.add(collapsibleWidget);
     }
 
+    public String getSelected(){
+        if(buttonGroup.getChecked() == null){
+            return "null";
+        }else {
+            Button button = buttonGroup.getChecked();
+
+            return button.getName() != null ? button.getName() : "null";
+        }
+    }
+
     public void update(final HashMap<String, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera){
         collapsibleTable.clear();
+        buttonGroup.clear();
+        VisTextButton clear = new VisTextButton("None");
+        clear.setName("null");
+        buttonGroup.add(clear);
+        collapsibleTable.add(clear).fillX().pad(2).row();
         for(final Map.Entry<String, Model> entry : loadedModels.entrySet()){
             final VisTextButton t = new VisTextButton(entry.getKey().substring(entry.getKey().lastIndexOf("/") +1, entry.getKey().lastIndexOf(".")));
-            final Model model = entry.getValue();
-            t.addListener(new ChangeListener() {
-                public void changed(ChangeEvent event, Actor actor) {
-                    GameObject object = null;
-                    if(entry.getKey().equals(ModelList.MODEL_RUST_CUBE.get())){
-                        object = new RustCube(model);
-                        object.setAsPhysicsObject(physicsWorld);
-                    }else if(entry.getKey().equals(ModelList.MODEL_FLOOR.get())){
-                        object = new FloorObject(model);
-                        object.setAsPhysicsObject(physicsWorld);
-                    }else if(entry.getKey().equals(ModelList.MODEL_BOX.get())){
-                        object = new BoxObject(model);
-                        object.setAsPhysicsObject(physicsWorld);
-                    }
-
-                    float dist = 5f;
-                    vector3.set(camera.position.x + (camera.direction.x * dist), camera.position.y + (camera.direction.y * dist), camera.position.z + (camera.direction.z * dist));
-                    object.translate(vector3);
-
-                    objects.add(object);
-                }
-            });
+            t.setName(entry.getKey());
+            buttonGroup.add(t);
+//            final Model model = entry.getValue();
+//            t.addListener(new ChangeListener() {
+//                public void changed(ChangeEvent event, Actor actor) {
+//                    GameObject object = null;
+//                    if(entry.getKey().equals(ModelList.MODEL_RUST_CUBE.get())){
+//                        object = new RustCube(model);
+//                        object.setAsPhysicsObject(physicsWorld);
+//                    }else if(entry.getKey().equals(ModelList.MODEL_FLOOR.get())){
+//                        object = new FloorObject(model);
+//                        object.setAsPhysicsObject(physicsWorld);
+//                    }else if(entry.getKey().equals(ModelList.MODEL_BOX.get())){
+//                        object = new BoxObject(model);
+//                        object.setAsPhysicsObject(physicsWorld);
+//                    }
+//
+//                    float dist = 5f;
+//                    vector3.set(camera.position.x + (camera.direction.x * dist), camera.position.y + (camera.direction.y * dist), camera.position.z + (camera.direction.z * dist));
+//                    object.translate(vector3);
+//
+//                    objects.add(object);
+//                }
+//            });
 
             collapsibleTable.add(t).fillX().pad(2).row();
         }

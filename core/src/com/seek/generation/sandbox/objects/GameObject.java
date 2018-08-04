@@ -9,6 +9,7 @@ import com.seek.generation.sandbox.physics.PhysicsWorld;
 public abstract class GameObject extends ModelInstance{
 
     private PhysicsBody body = null;
+    private String name = "";
 
     public GameObject(Model model) {
         super(model);
@@ -17,6 +18,15 @@ public abstract class GameObject extends ModelInstance{
     public void setupPhysicsBody(PhysicsWorld world, PhysicsBody body){
         this.body = body;
         world.addRigidBody(body);
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     public void translate(Vector3 position){
