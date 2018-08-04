@@ -1,10 +1,10 @@
 package com.seek.generation.sandbox;
 
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -12,11 +12,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.utils.Array;
+import com.seek.generation.sandbox.objects.BoxObject;
+import com.seek.generation.sandbox.objects.FloorObject;
+import com.seek.generation.sandbox.objects.GameObject;
+import com.seek.generation.sandbox.objects.RustCube;
+import com.seek.generation.sandbox.physics.ObjectMotionState;
+import com.seek.generation.sandbox.physics.PhysicsBody;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 
 import java.util.HashMap;
@@ -30,8 +37,8 @@ public class Sandbox extends ApplicationAdapter {
     private AssetManager assetManager;
     private Environment environment;
 
-    private Array<ModelInstance> instances = new Array<ModelInstance>();
-    private ModelInstance floorInstance = null;
+    private Array<GameObject> instances = new Array<GameObject>();
+    private FloorObject floorInstance = null;
 
     private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
     private HashMap<String, Boolean> modelQueToRemove = new HashMap<String, Boolean>();
@@ -114,7 +121,7 @@ public class Sandbox extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             Model model = getModel(ModelList.MODEL_BOX);
             if (model != null) {
-                ModelInstance instance = new ModelInstance(model);
+                GameObject instance = new BoxObject(model);
                 instances.add(instance);
             }
         }
@@ -122,10 +129,31 @@ public class Sandbox extends ApplicationAdapter {
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)){
             Model model = getModel(ModelList.MODEL_RUST_CUBE);
             if(model != null){
-                ModelInstance instance = new ModelInstance(model);
-                instance.transform.setToTranslation(-5, -5, -5);
+                GameObject instance = new RustCube(model);
+                instance.transform.setToTranslation(-5, 25, -5);
+                instance.transform.rotate(Vector3.X, 25);
+                instance.transform.rotate(Vector3.Y, 25);
                 instances.add(instance);
 
+                Vector3 inertia = new Vector3();
+                float mass = 1f;
+                inertia.set(1, 1, 1);
+                btBoxShape shape = new btBoxShape(inertia);
+
+                inertia.set(0 ,0 ,0);
+                if(mass > 0f){
+                    shape.calculateLocalInertia(mass, inertia);
+                }
+
+                ObjectMotionState motionState = new ObjectMotionState();
+                motionState.transform = instance.transform;
+
+                btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+                //bouncyness
+                constructionInfo.setRestitution(1f);
+                PhysicsBody body = new PhysicsBody(constructionInfo);
+
+                instance.setupPhysicsBody(physicsWorld, body);
             }
         }
     }
@@ -147,8 +175,27 @@ public class Sandbox extends ApplicationAdapter {
         if(floorInstance == null){
             Model model = getModel(ModelList.MODEL_FLOOR);
             if(model != null){
-                floorInstance = new ModelInstance(model);
+                floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
+
+                Vector3 inertia = new Vector3();
+                float mass = 0f;
+                btBoxShape shape = new btBoxShape(floorInstance.model.meshParts.get(0).halfExtents);
+
+                inertia.set(0 ,0 ,0);
+                if(mass > 0f){
+                    shape.calculateLocalInertia(mass, inertia);
+                }
+
+                ObjectMotionState motionState = new ObjectMotionState();
+                motionState.transform = floorInstance.transform;
+
+                btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+                //bouncyness
+                constructionInfo.setRestitution(1f);
+                PhysicsBody body = new PhysicsBody(constructionInfo);
+
+                floorInstance.setupPhysicsBody(physicsWorld, body);
             }
         }
 
@@ -161,11 +208,17 @@ public class Sandbox extends ApplicationAdapter {
             }
         }
         batch.end();
+
+        physicsWorld.debugDraw(camera);
     }
 
     @Override
     public void dispose() {
         physicsWorld.dispose();
+
+        for(GameObject go : instances){
+            go.dispose();
+        }
         batch.dispose();
         assetManager.dispose();
     }
