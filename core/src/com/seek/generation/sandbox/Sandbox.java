@@ -123,6 +123,8 @@ public class Sandbox extends ApplicationAdapter {
             if (model != null) {
                 GameObject instance = new BoxObject(model);
                 instances.add(instance);
+
+                instance.setAsPhysicsObject(physicsWorld);
             }
         }
 
@@ -135,25 +137,7 @@ public class Sandbox extends ApplicationAdapter {
                 instance.transform.rotate(Vector3.Y, 25);
                 instances.add(instance);
 
-                Vector3 inertia = new Vector3();
-                float mass = 1f;
-                inertia.set(1, 1, 1);
-                btBoxShape shape = new btBoxShape(inertia);
-
-                inertia.set(0 ,0 ,0);
-                if(mass > 0f){
-                    shape.calculateLocalInertia(mass, inertia);
-                }
-
-                ObjectMotionState motionState = new ObjectMotionState();
-                motionState.transform = instance.transform;
-
-                btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
-                //bouncyness
-                constructionInfo.setRestitution(1f);
-                PhysicsBody body = new PhysicsBody(constructionInfo);
-
-                instance.setupPhysicsBody(physicsWorld, body);
+                instance.setAsPhysicsObject(physicsWorld);
             }
         }
     }
@@ -177,25 +161,7 @@ public class Sandbox extends ApplicationAdapter {
             if(model != null){
                 floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
-
-                Vector3 inertia = new Vector3();
-                float mass = 0f;
-                btBoxShape shape = new btBoxShape(floorInstance.model.meshParts.get(0).halfExtents);
-
-                inertia.set(0 ,0 ,0);
-                if(mass > 0f){
-                    shape.calculateLocalInertia(mass, inertia);
-                }
-
-                ObjectMotionState motionState = new ObjectMotionState();
-                motionState.transform = floorInstance.transform;
-
-                btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
-                //bouncyness
-                constructionInfo.setRestitution(1f);
-                PhysicsBody body = new PhysicsBody(constructionInfo);
-
-                floorInstance.setupPhysicsBody(physicsWorld, body);
+                floorInstance.setAsPhysicsObject(physicsWorld);
             }
         }
 
