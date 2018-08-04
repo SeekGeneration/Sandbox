@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.utils.Array;
+import com.seek.generation.sandbox.physics.PhysicsWorld;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,8 @@ public class Sandbox extends ApplicationAdapter {
     private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
     private HashMap<String, Boolean> modelQueToRemove = new HashMap<String, Boolean>();
     private HashMap<String, Model> loadedModels = new HashMap<String, Model>();
+
+    private PhysicsWorld physicsWorld;
 
     @Override
     public void create() {
@@ -58,6 +61,9 @@ public class Sandbox extends ApplicationAdapter {
         assetManager.setLoader(Texture.class, new TextureLoaderDefault(new InternalFileHandleResolver()));
 
         Gdx.input.setInputProcessor(cameraController);
+
+        physicsWorld = new PhysicsWorld();
+
         loadModel(ModelList.MODEL_FLOOR);
         loadModel(ModelList.MODEL_BOX);
         loadModel(ModelList.MODEL_RUST_CUBE);
@@ -136,6 +142,8 @@ public class Sandbox extends ApplicationAdapter {
         handleLoading();
         handleInput();
 
+        physicsWorld.step();
+
         if(floorInstance == null){
             Model model = getModel(ModelList.MODEL_FLOOR);
             if(model != null){
@@ -157,6 +165,7 @@ public class Sandbox extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        physicsWorld.dispose();
         batch.dispose();
         assetManager.dispose();
     }
