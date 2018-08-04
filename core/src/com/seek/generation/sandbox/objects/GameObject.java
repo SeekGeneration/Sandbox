@@ -26,6 +26,12 @@ public abstract class GameObject extends ModelInstance{
         }
     }
 
+    public void rotate(Vector3 rotation){
+        transform.rotate(Vector3.X, rotation.x);
+        transform.rotate(Vector3.Y, rotation.y);
+        transform.rotate(Vector3.Z, rotation.z);
+    }
+
     public abstract void setAsPhysicsObject(PhysicsWorld physicsWorld);
     public PhysicsBody getBody() {
          return body;

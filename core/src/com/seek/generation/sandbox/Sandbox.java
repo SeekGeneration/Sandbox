@@ -109,6 +109,7 @@ public class Sandbox extends ApplicationAdapter {
     public void resize(int width, int height) {
         camera.viewportWidth = width;
         camera.viewportHeight = height;
+        stage.getViewport().update(width, height, true);
     }
 
     private void handleLoading() {
@@ -124,7 +125,7 @@ public class Sandbox extends ApplicationAdapter {
                     Model model = assetManager.get(entry.getKey(), Model.class);
 
                     loadedModels.put(entry.getKey(), model);
-                    modelListView.update(loadedModels);
+                    modelListView.update(loadedModels, instances, physicsWorld, camera);
                     modelQueToRemove.put(entry.getKey(), entry.getValue());
                 }
             }
