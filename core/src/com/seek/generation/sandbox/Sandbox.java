@@ -29,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisProgressBar;
 import com.seek.generation.sandbox.objects.BoxObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
@@ -68,6 +69,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     private Stage stage;
     private Table rootTable;
     private ModelListView modelListView;
+    private VisProgressBar loadingBar;
 
     @Override
     public void create() {
@@ -103,8 +105,10 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         stage = new Stage();
         rootTable = new Table();
         modelListView = new ModelListView();
+        loadingBar = new VisProgressBar(0, 1f, 0.1f, false);
 
         rootTable.add(modelListView).grow().align(Align.left);
+        rootTable.add(loadingBar).align(Align.bottomRight);
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 //        stage.setDebugAll(true);
@@ -184,6 +188,9 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         String selectedpos = selectedObject != null ? selectedObject.transform.getTranslation(vector3) + "" : "";
         Gdx.graphics.setTitle("FPS: " + Gdx.graphics.getFramesPerSecond() + " Instances: " + instances.size + " Pos: " + camera.position + " selectedPos: " + selectedpos);
+
+        loadingBar.setVisible(assetManager.getProgress() < 1f);
+        loadingBar.setValue(assetManager.getProgress());
 
         if (!assetManager.update()) {
             //display a loading screen/bar
