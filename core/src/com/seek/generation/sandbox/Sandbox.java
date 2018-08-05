@@ -33,6 +33,7 @@ import com.seek.generation.sandbox.objects.BoxObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.objects.RustCube;
+import com.seek.generation.sandbox.objects.TorusKnot;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 import com.seek.generation.sandbox.ui.ModelListView;
 
@@ -96,6 +97,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         loadModel(ModelList.MODEL_FLOOR);
         loadModel(ModelList.MODEL_BOX);
         loadModel(ModelList.MODEL_RUST_CUBE);
+        loadModel(ModelList.MODEL_TORUS_KNOT);
 
         //setup UI
         stage = new Stage();
@@ -226,6 +228,17 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObjects.put(selected, obj);
                 selectedObject = obj;
             }
+        }else if(selected.equals(ModelList.MODEL_TORUS_KNOT.get())){
+            GameObject object = selectedObjects.get(selected);
+            if(object != null){
+                selectedObject = object;
+            }else{
+                TorusKnot obj = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
         }
 
         physicsWorld.step();
@@ -241,7 +254,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             if (model != null) {
                 floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
-                floorInstance.createAABB(physicsWorld, 0f);
+                floorInstance.createAABB(physicsWorld, 0f, 0.5f, 0f);
             }
         }
 
@@ -311,17 +324,22 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             if (select.equals(ModelList.MODEL_BOX.get())) {
                 BoxObject object = new BoxObject(getModel(ModelList.MODEL_BOX));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass());
+                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
             } else if (select.equals(ModelList.MODEL_RUST_CUBE.get())) {
                 RustCube object = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass());
+                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
             } else if (select.equals(ModelList.MODEL_FLOOR.get())) {
                 FloorObject object = new FloorObject(getModel(ModelList.MODEL_FLOOR));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass());
+                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                instances.add(object);
+            }else if(select.equals(ModelList.MODEL_TORUS_KNOT.get())){
+                TorusKnot object = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
+                object.transform.set(selectedObject.transform);
+                object.createConvexHull(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
             }
         }

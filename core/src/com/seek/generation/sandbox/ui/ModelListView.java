@@ -31,7 +31,7 @@ public class ModelListView extends Table{
     private ButtonGroup buttonGroup;
 
     private FloatSpinnerModel spinnerModel = new FloatSpinnerModel("1.0", "0.0", "1.0", "0.1");
-    private Spinner massSpinner;
+    private Spinner massSpinner, frictionSpinner, restitutionSpinner;
 
     public ModelListView() {
         super();
@@ -48,6 +48,8 @@ public class ModelListView extends Table{
         buttonGroup = new ButtonGroup();
 
         massSpinner = new Spinner("Mass: ", spinnerModel);
+        frictionSpinner = new Spinner("Friction: ", new FloatSpinnerModel("0.5", "0.0", "1.0", "0.1"));
+        restitutionSpinner = new Spinner("Restitution: ", new FloatSpinnerModel("0", "0.0", "1.0", "0.1"));
 
         models.addListener(new ChangeListener() {
             public void changed(ChangeEvent event, Actor actor) {
@@ -56,7 +58,9 @@ public class ModelListView extends Table{
             }
         });
 
-        propertyTable.add(massSpinner).pad(5);
+        propertyTable.add(massSpinner).right().pad(2).row();
+        propertyTable.add(frictionSpinner).right().pad(2).row();
+        propertyTable.add(restitutionSpinner).right().pad(2);
 
         align(Align.topLeft);
         add(models).align(Align.top).row();
@@ -117,5 +121,14 @@ public class ModelListView extends Table{
 
     public float getMass(){
         return Float.parseFloat(massSpinner.getModel().getText());
+    }
+
+    public float getFriction(){
+        return Float.parseFloat(frictionSpinner.getModel().getText());
+    }
+
+    public float getRestitution()
+    {
+        return Float.parseFloat(restitutionSpinner.getModel().getText());
     }
 }

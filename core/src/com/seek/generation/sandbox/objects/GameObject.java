@@ -1,9 +1,12 @@
 package com.seek.generation.sandbox.objects;
 
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
+import com.badlogic.gdx.physics.bullet.collision.btShapeHull;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.seek.generation.sandbox.physics.ObjectMotionState;
 import com.seek.generation.sandbox.physics.PhysicsBody;
@@ -13,6 +16,7 @@ public abstract class GameObject extends ModelInstance{
 
     private PhysicsBody body = null;
     private String name = "";
+    private Vector3 inertia = new Vector3();
 
     public GameObject(Model model) {
         super(model);
@@ -46,8 +50,7 @@ public abstract class GameObject extends ModelInstance{
     }
 
 //    public abstract void setAsPhysicsObject(PhysicsWorld physicsWorld);
-    public void createAABB(PhysicsWorld physicsWorld, float mass){
-        Vector3 inertia = new Vector3();
+    public void createAABB(PhysicsWorld physicsWorld, float mass, float friction, float restitution){
         btBoxShape shape = new btBoxShape(model.meshParts.get(0).halfExtents);
 
         inertia.set(0 ,0 ,0);
@@ -60,11 +63,41 @@ public abstract class GameObject extends ModelInstance{
 
         btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
         //bouncyness
-        constructionInfo.setRestitution(0f);
+        constructionInfo.setRestitution(restitution);
+        constructionInfo.setFriction(friction);
         PhysicsBody body = new PhysicsBody(constructionInfo);
 
         setupPhysicsBody(physicsWorld, body);
     }
+
+    public void createConvexHull(PhysicsWorld physicsWorld, float mass, float friction, float restitution){
+        final Mesh mesh = model.meshes.get(0);
+        final btConvexHullShape tmpShape = new btConvexHullShape(mesh.getVerticesBuffer(), mesh.getNumVertices(), mesh.getVertexSize());
+
+        final btShapeHull hull = new btShapeHull(tmpShape);
+        hull.buildHull(tmpShape.getMargin());
+        final btConvexHullShape shape = new btConvexHullShape(hull);
+
+        tmpShape.dispose();
+        hull.dispose();
+
+        inertia.set(0, 0, 0);
+        if(mass > 0f){
+            shape.calculateLocalInertia(mass, inertia);
+
+            ObjectMotionState motionState = new ObjectMotionState();
+            motionState.transform = transform;
+
+            btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+            constructionInfo.setRestitution(restitution);
+            constructionInfo.setFriction(friction);
+
+            PhysicsBody body = new PhysicsBody(constructionInfo);
+            setupPhysicsBody(physicsWorld, body);
+        }
+    }
+
+
     public PhysicsBody getBody() {
          return body;
     }
