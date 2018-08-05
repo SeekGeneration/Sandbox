@@ -48,8 +48,7 @@ public abstract class GameObject extends ModelInstance{
 //    public abstract void setAsPhysicsObject(PhysicsWorld physicsWorld);
     public void createAABB(PhysicsWorld physicsWorld, float mass){
         Vector3 inertia = new Vector3();
-        inertia.set(1, 1, 1);
-        btBoxShape shape = new btBoxShape(inertia);
+        btBoxShape shape = new btBoxShape(model.meshParts.get(0).halfExtents);
 
         inertia.set(0 ,0 ,0);
         if(mass > 0f){
