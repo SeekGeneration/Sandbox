@@ -3,6 +3,9 @@ package com.seek.generation.sandbox.objects;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.seek.generation.sandbox.physics.ObjectMotionState;
 import com.seek.generation.sandbox.physics.PhysicsBody;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 
@@ -42,7 +45,27 @@ public abstract class GameObject extends ModelInstance{
         transform.rotate(Vector3.Z, rotation.z);
     }
 
-    public abstract void setAsPhysicsObject(PhysicsWorld physicsWorld);
+//    public abstract void setAsPhysicsObject(PhysicsWorld physicsWorld);
+    public void createAABB(PhysicsWorld physicsWorld, float mass){
+        Vector3 inertia = new Vector3();
+        inertia.set(1, 1, 1);
+        btBoxShape shape = new btBoxShape(inertia);
+
+        inertia.set(0 ,0 ,0);
+        if(mass > 0f){
+            shape.calculateLocalInertia(mass, inertia);
+        }
+
+        ObjectMotionState motionState = new ObjectMotionState();
+        motionState.transform = transform;
+
+        btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+        //bouncyness
+        constructionInfo.setRestitution(0f);
+        PhysicsBody body = new PhysicsBody(constructionInfo);
+
+        setupPhysicsBody(physicsWorld, body);
+    }
     public PhysicsBody getBody() {
          return body;
     }

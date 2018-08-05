@@ -105,7 +105,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         rootTable.add(modelListView).grow().align(Align.left);
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
-        stage.setDebugAll(true);
+//        stage.setDebugAll(true);
 
         Gdx.input.setInputProcessor(new InputMultiplexer(stage, cameraController, this));
     }
@@ -153,28 +153,28 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     }
 
     private void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            Model model = getModel(ModelList.MODEL_BOX);
-            if (model != null) {
-                GameObject instance = new BoxObject(model);
-                instances.add(instance);
-
-                instance.setAsPhysicsObject(physicsWorld);
-            }
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            Model model = getModel(ModelList.MODEL_RUST_CUBE);
-            if (model != null) {
-                GameObject instance = new RustCube(model);
-                instance.transform.setToTranslation(-5, 25, -5);
-                instance.transform.rotate(Vector3.X, 25);
-                instance.transform.rotate(Vector3.Y, 25);
-                instances.add(instance);
-
-                instance.setAsPhysicsObject(physicsWorld);
-            }
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+//            Model model = getModel(ModelList.MODEL_BOX);
+//            if (model != null) {
+//                GameObject instance = new BoxObject(model);
+//                instances.add(instance);
+//
+//                instance.createAABB(physicsWorld, 1f);
+//            }
+//        }
+//
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+//            Model model = getModel(ModelList.MODEL_RUST_CUBE);
+//            if (model != null) {
+//                GameObject instance = new RustCube(model);
+//                instance.transform.setToTranslation(-5, 25, -5);
+//                instance.transform.rotate(Vector3.X, 25);
+//                instance.transform.rotate(Vector3.Y, 25);
+//                instances.add(instance);
+//
+//                instance.createAABB(physicsWorld, 1f);
+//            }
+//        }
     }
 
     @Override
@@ -241,7 +241,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             if (model != null) {
                 floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
-                floorInstance.setAsPhysicsObject(physicsWorld);
+                floorInstance.createAABB(physicsWorld, 0f);
             }
         }
 
@@ -311,17 +311,17 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             if (select.equals(ModelList.MODEL_BOX.get())) {
                 BoxObject object = new BoxObject(getModel(ModelList.MODEL_BOX));
                 object.transform.set(selectedObject.transform);
-                object.setAsPhysicsObject(physicsWorld);
+                object.createAABB(physicsWorld, modelListView.getMass());
                 instances.add(object);
             } else if (select.equals(ModelList.MODEL_RUST_CUBE.get())) {
                 RustCube object = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
                 object.transform.set(selectedObject.transform);
-                object.setAsPhysicsObject(physicsWorld);
+                object.createAABB(physicsWorld, modelListView.getMass());
                 instances.add(object);
             } else if (select.equals(ModelList.MODEL_FLOOR.get())) {
                 FloorObject object = new FloorObject(getModel(ModelList.MODEL_FLOOR));
                 object.transform.set(selectedObject.transform);
-                object.setAsPhysicsObject(physicsWorld);
+                object.createAABB(physicsWorld, modelListView.getMass());
                 instances.add(object);
             }
         }

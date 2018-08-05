@@ -2,8 +2,6 @@ package com.seek.generation.sandbox.ui;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
@@ -15,11 +13,9 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.CollapsibleWidget;
 import com.kotcrab.vis.ui.widget.Separator;
 import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.seek.generation.sandbox.ModelList;
-import com.seek.generation.sandbox.objects.BoxObject;
-import com.seek.generation.sandbox.objects.FloorObject;
+import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel;
+import com.kotcrab.vis.ui.widget.spinner.Spinner;
 import com.seek.generation.sandbox.objects.GameObject;
-import com.seek.generation.sandbox.objects.RustCube;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 
 import java.util.HashMap;
@@ -28,32 +24,47 @@ import java.util.Map;
 public class ModelListView extends Table{
 
     private VisTextButton models;
-    private Table rootTable, collapsibleTable;
+    private Table rootTable, modelsTable, propertyTable;
     private ScrollPane scroll;
-    private CollapsibleWidget collapsibleWidget;
+    private CollapsibleWidget collapsibleModelList, collapsiblePropertyWidget;
 
     private ButtonGroup buttonGroup;
+
+    private FloatSpinnerModel spinnerModel = new FloatSpinnerModel("1.0", "0.0", "1.0", "0.1");
+    private Spinner massSpinner;
 
     public ModelListView() {
         super();
         models = new VisTextButton("Models");
         rootTable = new Table();
         scroll = new ScrollPane(rootTable);
-        collapsibleTable = new Table();
-        collapsibleWidget = new CollapsibleWidget(collapsibleTable);
+
+        modelsTable = new Table();
+        collapsibleModelList = new CollapsibleWidget(modelsTable);
+
+        propertyTable = new Table();
+        collapsiblePropertyWidget = new CollapsibleWidget(propertyTable);
+
         buttonGroup = new ButtonGroup();
+
+        massSpinner = new Spinner("Mass: ", spinnerModel);
 
         models.addListener(new ChangeListener() {
             public void changed(ChangeEvent event, Actor actor) {
-                collapsibleWidget.setCollapsed(!collapsibleWidget.isCollapsed());
+                collapsibleModelList.setCollapsed(!collapsibleModelList.isCollapsed());
+                collapsiblePropertyWidget.setCollapsed(collapsibleModelList.isCollapsed());
             }
         });
 
+        propertyTable.add(massSpinner).pad(5);
+
         align(Align.topLeft);
         add(models).align(Align.top).row();
-        add(new Separator()).fillX().pad(5).row();
+        add(new Separator()).fillX().padTop(5).row();
         add(scroll);
-        rootTable.add(collapsibleWidget);
+        rootTable.add(collapsibleModelList);
+        rootTable.add(new Separator()).fillY();
+        rootTable.add(collapsiblePropertyWidget).align(Align.top);
     }
 
     public String getSelected(){
@@ -67,12 +78,12 @@ public class ModelListView extends Table{
     }
 
     public void update(final HashMap<String, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera){
-        collapsibleTable.clear();
+        modelsTable.clear();
         buttonGroup.clear();
         VisTextButton clear = new VisTextButton("None");
         clear.setName("null");
         buttonGroup.add(clear);
-        collapsibleTable.add(clear).fillX().pad(2).row();
+        modelsTable.add(clear).fillX().pad(2).row();
         for(final Map.Entry<String, Model> entry : loadedModels.entrySet()){
             final VisTextButton t = new VisTextButton(entry.getKey().substring(entry.getKey().lastIndexOf("/") +1, entry.getKey().lastIndexOf(".")));
             t.setName(entry.getKey());
@@ -100,7 +111,11 @@ public class ModelListView extends Table{
 //                }
 //            });
 
-            collapsibleTable.add(t).fillX().pad(2).row();
+            modelsTable.add(t).fillX().pad(2).row();
         }
+    }
+
+    public float getMass(){
+        return Float.parseFloat(massSpinner.getModel().getText());
     }
 }
