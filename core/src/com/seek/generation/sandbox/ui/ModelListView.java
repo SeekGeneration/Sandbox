@@ -8,10 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.CollapsibleWidget;
 import com.kotcrab.vis.ui.widget.Separator;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel;
 import com.kotcrab.vis.ui.widget.spinner.Spinner;
@@ -30,8 +32,8 @@ public class ModelListView extends Table{
 
     private ButtonGroup buttonGroup;
 
-    private FloatSpinnerModel spinnerModel = new FloatSpinnerModel("1.0", "0.0", "1.0", "0.1");
-    private Spinner massSpinner, frictionSpinner, restitutionSpinner;
+    private Spinner massSpinner, frictionSpinner, restitutionSpinner, xRotSpinner, yRotSpinner, zRotSpinner;
+    private Vector3 rotation = new Vector3();
 
     public ModelListView() {
         super();
@@ -46,10 +48,20 @@ public class ModelListView extends Table{
         collapsiblePropertyWidget = new CollapsibleWidget(propertyTable);
 
         buttonGroup = new ButtonGroup();
+        FloatSpinnerModel spinnerRotationXModel = new FloatSpinnerModel("0.0", "0.0", "360.0", "1.0");
+        FloatSpinnerModel spinnerRotationYModel = new FloatSpinnerModel("0.0", "0.0", "360.0", "1.0");
+        FloatSpinnerModel spinnerRotationZModel = new FloatSpinnerModel("0.0", "0.0", "360.0", "1.0");
 
-        massSpinner = new Spinner("Mass: ", spinnerModel);
+        spinnerRotationXModel.setWrap(true);
+        spinnerRotationYModel.setWrap(true);
+        spinnerRotationZModel.setWrap(true);
+
+        massSpinner = new Spinner("Mass: ", new FloatSpinnerModel("0.5", "0.0", "1.0", "0.1"));
         frictionSpinner = new Spinner("Friction: ", new FloatSpinnerModel("0.5", "0.0", "1.0", "0.1"));
         restitutionSpinner = new Spinner("Restitution: ", new FloatSpinnerModel("0", "0.0", "1.0", "0.1"));
+        xRotSpinner = new Spinner("X Rotation: ", spinnerRotationXModel);
+        yRotSpinner = new Spinner("Y Rotation: ", spinnerRotationYModel);
+        zRotSpinner = new Spinner("Z Rotation: ", spinnerRotationZModel);
 
         models.addListener(new ChangeListener() {
             public void changed(ChangeEvent event, Actor actor) {
@@ -58,9 +70,13 @@ public class ModelListView extends Table{
             }
         });
 
+        propertyTable.add(new VisLabel("Properties")).center().pad(2).row();
         propertyTable.add(massSpinner).right().pad(2).row();
         propertyTable.add(frictionSpinner).right().pad(2).row();
-        propertyTable.add(restitutionSpinner).right().pad(2);
+        propertyTable.add(restitutionSpinner).right().pad(2).row();
+        propertyTable.add(xRotSpinner).right().pad(2).row();
+        propertyTable.add(yRotSpinner).right().pad(2).row();
+        propertyTable.add(zRotSpinner).right().pad(2).row();
 
         align(Align.topLeft);
         add(models).align(Align.top).row();
@@ -130,5 +146,10 @@ public class ModelListView extends Table{
     public float getRestitution()
     {
         return Float.parseFloat(restitutionSpinner.getModel().getText());
+    }
+
+    public Vector3 getModelRotation(){
+        rotation.set(Float.parseFloat(xRotSpinner.getModel().getText()), Float.parseFloat(yRotSpinner.getModel().getText()), Float.parseFloat(zRotSpinner.getModel().getText()));
+        return rotation;
     }
 }

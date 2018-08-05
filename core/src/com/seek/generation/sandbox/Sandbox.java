@@ -1,5 +1,6 @@
 package com.seek.generation.sandbox;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -28,6 +29,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisProgressBar;
 import com.seek.generation.sandbox.objects.BoxObject;
@@ -102,7 +107,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         loadModel(ModelList.MODEL_TORUS_KNOT);
 
         //setup UI
-        stage = new Stage();
+        stage = new Stage(Gdx.app.getType() == Application.ApplicationType.Desktop ? new ScreenViewport() : new FitViewport(1920 / 3, 1080 / 3));
         rootTable = new Table();
         modelListView = new ModelListView();
         loadingBar = new VisProgressBar(0, 1f, 0.1f, false);
@@ -254,6 +259,9 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             float dist = 5f;
             vector3.set(camera.position.x + (camera.direction.x * dist), camera.position.y + (camera.direction.y * dist), camera.position.z + (camera.direction.z * dist));
             selectedObject.translate(vector3);
+            selectedObject.transform.rotate(Vector3.X, modelListView.getModelRotation().x);
+            selectedObject.transform.rotate(Vector3.Y, modelListView.getModelRotation().y);
+            selectedObject.transform.rotate(Vector3.Z, modelListView.getModelRotation().z);
         }
 
         if (floorInstance == null) {
@@ -324,7 +332,6 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        System.out.println(button + " : " + Input.Buttons.RIGHT);
         if (button == Input.Buttons.RIGHT && selectedObject != null) {
             String select = selectedObject.getName();
 
