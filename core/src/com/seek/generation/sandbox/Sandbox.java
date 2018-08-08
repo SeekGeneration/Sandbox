@@ -36,6 +36,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisProgressBar;
 import com.seek.generation.sandbox.objects.BoxObject;
+import com.seek.generation.sandbox.objects.ConeObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.objects.RustCube;
@@ -105,6 +106,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         loadModel(ModelList.MODEL_BOX);
         loadModel(ModelList.MODEL_RUST_CUBE);
         loadModel(ModelList.MODEL_TORUS_KNOT);
+        loadModel(ModelList.MODEL_CONE);
 
         //setup UI
         stage = new Stage(Gdx.app.getType() == Application.ApplicationType.Desktop ? new ScreenViewport() : new FitViewport(1920 / 3, 1080 / 3));
@@ -251,6 +253,17 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObjects.put(selected, obj);
                 selectedObject = obj;
             }
+        }else if(selected.equals(ModelList.MODEL_CONE.get())){
+            GameObject object = selectedObjects.get(selected);
+            if(object != null){
+                selectedObject = object;
+            }else{
+                ConeObject obj = new ConeObject(getModel(ModelList.MODEL_CONE));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
         }
 
         physicsWorld.step();
@@ -354,6 +367,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 TorusKnot object = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
                 object.transform.set(selectedObject.transform);
                 object.createConvexHull(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                instances.add(object);
+            }else if(select.equals(ModelList.MODEL_CONE.get())){
+                ConeObject object = new ConeObject(getModel(ModelList.MODEL_CONE));
+                object.transform.set(selectedObject.transform);
+                object.createCone(physicsWorld, 1, 2, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
             }
         }
