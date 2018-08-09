@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
 import com.badlogic.gdx.physics.bullet.collision.btShapeHull;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.seek.generation.sandbox.ModelList;
 import com.seek.generation.sandbox.physics.ObjectMotionState;
 import com.seek.generation.sandbox.physics.PhysicsBody;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
@@ -16,7 +17,7 @@ import com.seek.generation.sandbox.physics.PhysicsWorld;
 public abstract class GameObject extends ModelInstance{
 
     private PhysicsBody body = null;
-    private String name = "";
+    private ModelList name = ModelList.NULL;
     private Vector3 inertia = new Vector3();
 
     public GameObject(Model model) {
@@ -28,11 +29,11 @@ public abstract class GameObject extends ModelInstance{
         world.addRigidBody(body);
     }
 
-    public void setName(String name){
+    public void setName(ModelList name){
         this.name = name;
     }
 
-    public String getName()
+    public ModelList getName()
     {
         return name;
     }

@@ -1,14 +1,11 @@
 package com.seek.generation.sandbox;
 
 import com.badlogic.gdx.Application;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -24,14 +21,11 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisProgressBar;
@@ -58,12 +52,12 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     private Array<GameObject> instances = new Array<GameObject>();
     //used as a place holder for selected objects
-    private HashMap<String, GameObject> selectedObjects = new HashMap<String, GameObject>();
+    private HashMap<ModelList, GameObject> selectedObjects = new HashMap<ModelList, GameObject>();
     private FloorObject floorInstance = null;
 
-    private HashMap<String, Boolean> modelQue = new HashMap<String, Boolean>();
-    private HashMap<String, Boolean> modelQueToRemove = new HashMap<String, Boolean>();
-    private HashMap<String, Model> loadedModels = new HashMap<String, Model>();
+    private HashMap<ModelList, Boolean> modelQue = new HashMap<ModelList, Boolean>();
+    private HashMap<ModelList, Boolean> modelQueToRemove = new HashMap<ModelList, Boolean>();
+    private HashMap<ModelList, Model> loadedModels = new HashMap<ModelList, Model>();
 
     private GameObject selectedObject = null;
     private Vector3 vector3 = new Vector3();
@@ -124,11 +118,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     }
 
     private void loadModel(ModelList model) {
-        modelQue.put(model.get(), false);
+        modelQue.put(model, false);
     }
 
     private Model getModel(ModelList model) {
-        return loadedModels.get(model.get());
+        return loadedModels.get(model);
     }
 
     @Override
@@ -142,13 +136,13 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         //checks if value is false, if false then asset manager needs to load the model if true then
         //the asset manager has already started loading the model and if true we will check if it
         //has finished loading then if isLoaded returns true we add it to the loaded models array
-        for (Map.Entry<String, Boolean> entry : modelQue.entrySet()) {
+        for (Map.Entry<ModelList, Boolean> entry : modelQue.entrySet()) {
             if (entry.getValue() == false) {
-                assetManager.load(entry.getKey(), Model.class);
+                assetManager.load(entry.getKey().get(), Model.class);
                 entry.setValue(true);
             } else {
-                if (assetManager.isLoaded(entry.getKey())) {
-                    Model model = assetManager.get(entry.getKey(), Model.class);
+                if (assetManager.isLoaded(entry.getKey().get())) {
+                    Model model = assetManager.get(entry.getKey().get(), Model.class);
 
                     loadedModels.put(entry.getKey(), model);
                     modelListView.update(loadedModels, instances, physicsWorld, camera);
@@ -157,7 +151,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             }
         }
 
-        for (Map.Entry<String, Boolean> entry : modelQueToRemove.entrySet()) {
+        for (Map.Entry<ModelList, Boolean> entry : modelQueToRemove.entrySet()) {
             if (modelQue.get(entry.getKey())) {
                 modelQue.remove(entry.getKey());
             }
@@ -190,6 +184,72 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 //        }
     }
 
+    /**
+     * checks the GUI which button is selected and sets the selectedObject instance
+     */
+    private void handleSelectedObject() {
+//        String selected = modelListView.getSelected();
+        ModelList selected = modelListView.getSelected();
+        if (selected == ModelList.NULL) {
+            selectedObject = null;
+        } else if (selected == ModelList.MODEL_BOX) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                BoxObject obj = new BoxObject(getModel(ModelList.MODEL_BOX));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
+        } else if (selected == ModelList.MODEL_RUST_CUBE) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                RustCube obj = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
+        } else if (selected == ModelList.MODEL_FLOOR) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                FloorObject obj = new FloorObject(getModel(ModelList.MODEL_FLOOR));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
+        } else if (selected == ModelList.MODEL_TORUS_KNOT) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                TorusKnot obj = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
+        } else if (selected == ModelList.MODEL_CONE) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                ConeObject obj = new ConeObject(getModel(ModelList.MODEL_CONE));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
+        }
+    }
+
     @Override
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -205,69 +265,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         handleLoading();
         handleInput();
-
-        String selected = modelListView.getSelected();
-        if (selected.equals("null")) {
-            selectedObject = null;
-        } else if (selected.equals(ModelList.MODEL_BOX.get())) {
-            GameObject object = selectedObjects.get(selected);
-            if (object != null) {
-                selectedObject = object;
-            } else {
-                BoxObject obj = new BoxObject(getModel(ModelList.MODEL_BOX));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
-                selectedObject = obj;
-            }
-        }else if(selected.equals(ModelList.MODEL_RUST_CUBE.get())){
-            GameObject object = selectedObjects.get(selected);
-            if (object != null) {
-                selectedObject = object;
-            } else {
-                RustCube obj = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
-                selectedObject = obj;
-            }
-        }else if(selected.equals(ModelList.MODEL_FLOOR.get())){
-            GameObject object = selectedObjects.get(selected);
-            if (object != null) {
-                selectedObject = object;
-            } else {
-                FloorObject obj = new FloorObject(getModel(ModelList.MODEL_FLOOR));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
-                selectedObject = obj;
-            }
-        }else if(selected.equals(ModelList.MODEL_TORUS_KNOT.get())){
-            GameObject object = selectedObjects.get(selected);
-            if(object != null){
-                selectedObject = object;
-            }else{
-                TorusKnot obj = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
-                selectedObject = obj;
-            }
-        }else if(selected.equals(ModelList.MODEL_CONE.get())){
-            GameObject object = selectedObjects.get(selected);
-            if(object != null){
-                selectedObject = object;
-            }else{
-                ConeObject obj = new ConeObject(getModel(ModelList.MODEL_CONE));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
-                selectedObject = obj;
-            }
-        }
+        handleSelectedObject();
 
         physicsWorld.step();
 
+        // checks for the selected object and displays it in front of the player
         if (selectedObject != null) {
             float dist = 5f;
             vector3.set(camera.position.x + (camera.direction.x * dist), camera.position.y + (camera.direction.y * dist), camera.position.z + (camera.direction.z * dist));
@@ -277,11 +279,14 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             selectedObject.transform.rotate(Vector3.Z, modelListView.getModelRotation().z);
         }
 
+        //creates a floor for the player to land on
         if (floorInstance == null) {
             Model model = getModel(ModelList.MODEL_FLOOR);
+            System.out.println(model == null);
             if (model != null) {
                 floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
+                System.out.println("Created floor");
                 floorInstance.createAABB(physicsWorld, 0f, 0.5f, 0f);
             }
         }
@@ -306,7 +311,8 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         stage.draw();
     }
 
-    private void applyAlpha(GameObject gameObject){
+    //makes the object see through
+    private void applyAlpha(GameObject gameObject) {
         Material material = gameObject.materials.get(0);
         ColorAttribute colorAttribute = new ColorAttribute(ColorAttribute.Diffuse, new Color(1, 1, 1, 0.7f));
         BlendingAttribute blendingAttribute = new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -346,29 +352,30 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (button == Input.Buttons.RIGHT && selectedObject != null) {
-            String select = selectedObject.getName();
+//            String select = selectedObject.getName();
+            ModelList select = selectedObject.getName();
 
-            if (select.equals(ModelList.MODEL_BOX.get())) {
+            if (select == ModelList.MODEL_BOX) {
                 BoxObject object = new BoxObject(getModel(ModelList.MODEL_BOX));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
-            } else if (select.equals(ModelList.MODEL_RUST_CUBE.get())) {
+            } else if (select == ModelList.MODEL_RUST_CUBE) {
                 RustCube object = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
-            } else if (select.equals(ModelList.MODEL_FLOOR.get())) {
+            } else if (select == ModelList.MODEL_FLOOR) {
                 FloorObject object = new FloorObject(getModel(ModelList.MODEL_FLOOR));
                 object.transform.set(selectedObject.transform);
-                object.createAABB(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
-            }else if(select.equals(ModelList.MODEL_TORUS_KNOT.get())){
+            } else if (select == ModelList.MODEL_TORUS_KNOT) {
                 TorusKnot object = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
                 object.transform.set(selectedObject.transform);
-                object.createConvexHull(physicsWorld, modelListView.getMass(),modelListView.getFriction(), modelListView.getRestitution());
+                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
-            }else if(select.equals(ModelList.MODEL_CONE.get())){
+            } else if (select == ModelList.MODEL_CONE) {
                 ConeObject object = new ConeObject(getModel(ModelList.MODEL_CONE));
                 object.transform.set(selectedObject.transform);
                 object.createCone(physicsWorld, 1, 2, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());

@@ -17,6 +17,7 @@ import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel;
 import com.kotcrab.vis.ui.widget.spinner.Spinner;
+import com.seek.generation.sandbox.ModelList;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 
@@ -87,26 +88,37 @@ public class ModelListView extends Table{
         rootTable.add(collapsiblePropertyWidget).align(Align.top);
     }
 
-    public String getSelected(){
+    /**
+     *  @return returns the selected button
+     */
+    public ModelList getSelected(){
         if(buttonGroup.getChecked() == null){
-            return "null";
+            return ModelList.NULL;
         }else {
             Button button = buttonGroup.getChecked();
-
-            return button.getName() != null ? button.getName() : "null";
+            ModelList type = ModelList.NULL;
+            for(ModelList t : ModelList.values()){
+                if(t.get().equals(button.getName())){
+                    type = t;
+                    break;
+                }
+            }
+            return button.getName() != null ? type : ModelList.NULL;
+//            return button.getName() != null ? button.getName() : "null";
         }
     }
 
-    public void update(final HashMap<String, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera){
+    //updates the GUI when the loaded models change
+    public void update(final HashMap<ModelList, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera){
         modelsTable.clear();
         buttonGroup.clear();
         VisTextButton clear = new VisTextButton("None");
         clear.setName("null");
         buttonGroup.add(clear);
         modelsTable.add(clear).fillX().pad(2).row();
-        for(final Map.Entry<String, Model> entry : loadedModels.entrySet()){
-            final VisTextButton t = new VisTextButton(entry.getKey().substring(entry.getKey().lastIndexOf("/") +1, entry.getKey().lastIndexOf(".")));
-            t.setName(entry.getKey());
+        for(final Map.Entry<ModelList, Model> entry : loadedModels.entrySet()){
+            final VisTextButton t = new VisTextButton(entry.getKey().get().substring(entry.getKey().get().lastIndexOf("/") +1, entry.getKey().get().lastIndexOf(".")));
+            t.setName(entry.getKey().get());
             buttonGroup.add(t);
 //            final Model model = entry.getValue();
 //            t.addListener(new ChangeListener() {
