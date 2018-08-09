@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
+import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btShapeHull;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.seek.generation.sandbox.ModelList;
@@ -91,6 +92,26 @@ public abstract class GameObject extends ModelInstance{
 
         setupPhysicsBody(physicsWorld, body);
 
+    }
+
+    public void createCylinder(PhysicsWorld physicsWorld, Vector3 halfExtents, float mass, float friction, float restitution){
+        btCylinderShape shape = new btCylinderShape(halfExtents);
+
+        inertia.set(0, 0 , 0);
+        if(mass > 0f){
+            shape.calculateLocalInertia(mass, inertia);
+        }
+
+        ObjectMotionState motionState = new ObjectMotionState();
+        motionState.transform = transform;
+
+        btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+        //bouncyness
+        constructionInfo.setRestitution(restitution);
+        constructionInfo.setFriction(friction);
+        PhysicsBody body = new PhysicsBody(constructionInfo);
+
+        setupPhysicsBody(physicsWorld, body);
     }
 
     public void createConvexHull(PhysicsWorld physicsWorld, float mass, float friction, float restitution){

@@ -7,7 +7,8 @@ public enum ModelList {
     MODEL_BOX("models/box/box.obj"),
     MODEL_RUST_CUBE("models/rustCube/rustCube.g3db"),
     MODEL_TORUS_KNOT("models/torus/knot/torus_knot.obj"),
-    MODEL_CONE("models/cone/cone.obj");
+    MODEL_CONE("models/cone/cone.obj"),
+    MODEL_CYLINDER("models/cylinder/cylinder.obj");
 
     String model;
 

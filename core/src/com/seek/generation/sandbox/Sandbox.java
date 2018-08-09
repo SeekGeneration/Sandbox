@@ -31,6 +31,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisProgressBar;
 import com.seek.generation.sandbox.objects.BoxObject;
 import com.seek.generation.sandbox.objects.ConeObject;
+import com.seek.generation.sandbox.objects.CylinderObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.objects.RustCube;
@@ -101,6 +102,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         loadModel(ModelList.MODEL_RUST_CUBE);
         loadModel(ModelList.MODEL_TORUS_KNOT);
         loadModel(ModelList.MODEL_CONE);
+        loadModel(ModelList.MODEL_CYLINDER);
 
         //setup UI
         stage = new Stage(Gdx.app.getType() == Application.ApplicationType.Desktop ? new ScreenViewport() : new FitViewport(1920 / 3, 1080 / 3));
@@ -247,6 +249,17 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObjects.put(selected, obj);
                 selectedObject = obj;
             }
+        }else if(selected == ModelList.MODEL_CYLINDER){
+            GameObject object = selectedObjects.get(selected);
+            if(object != null){
+                selectedObject = object;
+            }else{
+                CylinderObject obj = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
+                applyAlpha(obj);
+                obj.setName(selected);
+                selectedObjects.put(selected, obj);
+                selectedObject = obj;
+            }
         }
     }
 
@@ -379,6 +392,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 ConeObject object = new ConeObject(getModel(ModelList.MODEL_CONE));
                 object.transform.set(selectedObject.transform);
                 object.createCone(physicsWorld, 1, 2, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
+                instances.add(object);
+            }else if(select == ModelList.MODEL_CYLINDER){
+                CylinderObject object = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
+                object.transform.set(selectedObject.transform);
+                object.createCylinder(physicsWorld, new Vector3(1, 1, 1), modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
                 instances.add(object);
             }
         }
