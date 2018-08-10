@@ -48,7 +48,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     //graphics
     private PerspectiveCamera camera;
-    private FirstPersonCameraController cameraController;
+    private CameraController cameraController;
     private ModelBatch batch;
     private AssetManager assetManager;
     private Environment environment;
@@ -80,7 +80,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         VisUI.load();
         camera = new PerspectiveCamera(70, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cameraController = new FirstPersonCameraController(camera);
+        cameraController = new CameraController(camera);
         batch = new ModelBatch();
         assetManager = new AssetManager();
         environment = new Environment();
@@ -93,7 +93,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         camera.far = 50000f;
         camera.position.set(0, 5, 0);
         camera.update();
-        cameraController.setVelocity(50);
+//        cameraController.setVelocity(50);
 
         assetManager.setLoader(Texture.class, new TextureLoaderDefault(new InternalFileHandleResolver()));
 
@@ -164,6 +164,10 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     }
 
     private void handleInput() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.G)){
+            Gdx.input.setCursorCatched(!Gdx.input.isCursorCatched());
+        }
+
         if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
             btCollisionObject obj = physicsWorld.rayTest(camera);
             for(GameObject go : instances){
