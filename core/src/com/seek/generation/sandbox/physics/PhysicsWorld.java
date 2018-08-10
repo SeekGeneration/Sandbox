@@ -3,8 +3,10 @@ package com.seek.generation.sandbox.physics;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.DebugDrawer;
+import com.badlogic.gdx.physics.bullet.collision.ClosestRayResultCallback;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
@@ -32,6 +34,10 @@ public class PhysicsWorld {
 
     private final DebugDrawer debugDrawer;
 
+    public ClosestRayResultCallback rayResultCallback;
+    public Vector3 rayFrom = new Vector3();
+    public Vector3 rayTo = new Vector3();
+
     public PhysicsWorld(){
         Bullet.init();
 
@@ -44,6 +50,29 @@ public class PhysicsWorld {
         debugDrawer = new DebugDrawer();
         debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_MAX_DEBUG_DRAW_MODE);
         dynamicsWorld.setDebugDrawer(debugDrawer);
+
+        rayResultCallback = new ClosestRayResultCallback(Vector3.Zero, Vector3.Z);
+    }
+
+    public btCollisionObject rayTest(Camera camera){
+        Ray ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+        rayFrom.set(ray.origin);
+        rayTo.set(ray.direction).scl(50f).add(rayFrom);
+
+        rayResultCallback.setCollisionObject(null);
+        rayResultCallback.setClosestHitFraction(1f);
+        rayResultCallback.setRayFromWorld(rayFrom);
+        rayResultCallback.setRayToWorld(rayTo);
+
+        dynamicsWorld.rayTest(rayFrom, rayTo, rayResultCallback);
+
+        if(rayResultCallback.hasHit()){
+            final btCollisionObject obj = rayResultCallback.getCollisionObject();
+
+            return obj;
+        }
+
+        return null;
     }
 
     public void debugDraw(Camera camera){
@@ -94,5 +123,6 @@ public class PhysicsWorld {
         constrainSolver.dispose();
         broadphase.dispose();
         dispatcher.dispose();
+        rayResultCallback.dispose();
     }
 }

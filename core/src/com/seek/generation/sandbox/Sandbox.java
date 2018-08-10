@@ -21,6 +21,8 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -162,6 +164,16 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     }
 
     private void handleInput() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+            btCollisionObject obj = physicsWorld.rayTest(camera);
+            for(GameObject go : instances){
+                if(go.getBody().equals(obj)){
+                    go.getBody().activate();
+                    go.getBody().applyCentralForce(new Vector3(camera.direction).scl(70f));
+                    break;
+                }
+            }
+        }
 //        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
 //            Model model = getModel(ModelList.MODEL_BOX);
 //            if (model != null) {
@@ -200,9 +212,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             } else {
                 BoxObject obj = new BoxObject(getModel(ModelList.MODEL_BOX));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         } else if (selected == ModelList.MODEL_RUST_CUBE) {
@@ -211,9 +221,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             } else {
                 RustCube obj = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         } else if (selected == ModelList.MODEL_FLOOR) {
@@ -222,9 +230,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             } else {
                 FloorObject obj = new FloorObject(getModel(ModelList.MODEL_FLOOR));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         } else if (selected == ModelList.MODEL_TORUS_KNOT) {
@@ -233,9 +239,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             } else {
                 TorusKnot obj = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         } else if (selected == ModelList.MODEL_CONE) {
@@ -244,9 +248,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             } else {
                 ConeObject obj = new ConeObject(getModel(ModelList.MODEL_CONE));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         }else if(selected == ModelList.MODEL_CYLINDER){
@@ -255,12 +257,16 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             }else{
                 CylinderObject obj = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
-                applyAlpha(obj);
-                obj.setName(selected);
-                selectedObjects.put(selected, obj);
+                setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         }
+    }
+
+    private void setupPlaceHolder(GameObject obj, ModelList selected){
+        applyAlpha(obj);
+        obj.setName(selected);
+        selectedObjects.put(selected, obj);
     }
 
     @Override
@@ -295,11 +301,9 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         //creates a floor for the player to land on
         if (floorInstance == null) {
             Model model = getModel(ModelList.MODEL_FLOOR);
-            System.out.println(model == null);
             if (model != null) {
                 floorInstance = new FloorObject(model);
                 instances.add(floorInstance);
-                System.out.println("Created floor");
                 floorInstance.createAABB(physicsWorld, 0f, 0.5f, 0f);
             }
         }
@@ -322,6 +326,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         stage.act();
         stage.draw();
+
     }
 
     //makes the object see through
@@ -368,35 +373,32 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 //            String select = selectedObject.getName();
             ModelList select = selectedObject.getName();
 
+            GameObject object = null;
+
             if (select == ModelList.MODEL_BOX) {
-                BoxObject object = new BoxObject(getModel(ModelList.MODEL_BOX));
-                object.transform.set(selectedObject.transform);
+                object = new BoxObject(getModel(ModelList.MODEL_BOX));
                 object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-                instances.add(object);
             } else if (select == ModelList.MODEL_RUST_CUBE) {
-                RustCube object = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
-                object.transform.set(selectedObject.transform);
+                object = new RustCube(getModel(ModelList.MODEL_RUST_CUBE));
                 object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-                instances.add(object);
             } else if (select == ModelList.MODEL_FLOOR) {
-                FloorObject object = new FloorObject(getModel(ModelList.MODEL_FLOOR));
-                object.transform.set(selectedObject.transform);
+                object = new FloorObject(getModel(ModelList.MODEL_FLOOR));
                 object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-                instances.add(object);
             } else if (select == ModelList.MODEL_TORUS_KNOT) {
-                TorusKnot object = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
-                object.transform.set(selectedObject.transform);
+                object = new TorusKnot(getModel(ModelList.MODEL_TORUS_KNOT));
                 object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-                instances.add(object);
             } else if (select == ModelList.MODEL_CONE) {
-                ConeObject object = new ConeObject(getModel(ModelList.MODEL_CONE));
-                object.transform.set(selectedObject.transform);
+                object = new ConeObject(getModel(ModelList.MODEL_CONE));
                 object.createCone(physicsWorld, 1, 2, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-                instances.add(object);
             }else if(select == ModelList.MODEL_CYLINDER){
-                CylinderObject object = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
-                object.transform.set(selectedObject.transform);
+                object = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
                 object.createCylinder(physicsWorld, new Vector3(1, 1, 1), modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
+            }
+
+            if(object != null){
+                object.getBody().setWorldTransform(selectedObject.transform);
+                object.transform.set(selectedObject.transform);
+                object.setName(selectedObject.getName());
                 instances.add(object);
             }
         }
