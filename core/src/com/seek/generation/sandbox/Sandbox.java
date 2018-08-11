@@ -5,7 +5,9 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -58,6 +60,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     //used as a place holder for selected objects
     private HashMap<ModelList, GameObject> selectedObjects = new HashMap<ModelList, GameObject>();
     private FloorObject floorInstance = null;
+    private Skybox skybox = null;
 
     private HashMap<ModelList, Boolean> modelQue = new HashMap<ModelList, Boolean>();
     private HashMap<ModelList, Boolean> modelQueToRemove = new HashMap<ModelList, Boolean>();
@@ -101,6 +104,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         physicsWorld = new PhysicsWorld();
 
+        loadModel(ModelList.SKYBOX);
         loadModel(ModelList.MODEL_FLOOR);
         loadModel(ModelList.MODEL_BOX);
         loadModel(ModelList.MODEL_RUST_CUBE);
@@ -314,6 +318,15 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             selectedObject.transform.rotate(Vector3.Z, modelListView.getModelRotation().z);
         }
 
+        //create the skybox
+        if(skybox == null){
+            Model model = getModel(ModelList.SKYBOX);
+            if(model != null){
+                skybox = new Skybox(model);
+//                instances.add(skybox);
+            }
+        }
+
         //creates a floor for the player to land on
         if (floorInstance == null) {
             Model model = getModel(ModelList.MODEL_FLOOR);
@@ -334,6 +347,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             }
             if (selectedObject != null) {
                 batch.render(selectedObject, environment);
+            }
+
+            if(skybox != null){
+                skybox.transform.setToTranslation(camera.position);
+                batch.render(skybox);
             }
         }
         batch.end();

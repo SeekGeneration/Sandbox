@@ -3,6 +3,7 @@ package com.seek.generation.sandbox;
 public enum ModelList {
 
     NULL("null"),
+    SKYBOX("models/skybox/skybox.g3db"),
     MODEL_FLOOR("models/floor/floor.g3db"),
     MODEL_BOX("models/box/box.obj"),
     MODEL_RUST_CUBE("models/rustCube/rustCube.g3db"),
