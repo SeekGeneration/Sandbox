@@ -95,7 +95,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
         camera.near = 0.1f;
-        camera.far = 50000f;
+        camera.far = 3000f;
         camera.position.set(0, 5, 0);
         camera.update();
 //        cameraController.setVelocity(50);
@@ -350,7 +350,10 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             }
 
             if(skybox != null){
+//                skybox.transform = camera.combined;
                 skybox.transform.setToTranslation(camera.position);
+                float scale = camera.far - (camera.far * 0.5f);
+                skybox.transform.scale(scale, scale, scale);
                 batch.render(skybox);
             }
         }
