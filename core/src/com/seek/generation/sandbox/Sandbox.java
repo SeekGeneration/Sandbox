@@ -37,6 +37,7 @@ import com.seek.generation.sandbox.objects.CylinderObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.objects.RustCube;
+import com.seek.generation.sandbox.objects.StairsObject;
 import com.seek.generation.sandbox.objects.TorusKnot;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 import com.seek.generation.sandbox.ui.ModelListView;
@@ -64,6 +65,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     private GameObject selectedObject = null;
     private Vector3 vector3 = new Vector3();
+    private float selectedObjectZoom = 1f;
 
     //physics
     private PhysicsWorld physicsWorld;
@@ -105,6 +107,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         loadModel(ModelList.MODEL_TORUS_KNOT);
         loadModel(ModelList.MODEL_CONE);
         loadModel(ModelList.MODEL_CYLINDER);
+        loadModel(ModelList.MODEL_STAIRS);
 
         //setup UI
         stage = new Stage(Gdx.app.getType() == Application.ApplicationType.Desktop ? new ScreenViewport() : new FitViewport(1920 / 3, 1080 / 3));
@@ -164,14 +167,14 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     }
 
     private void handleInput() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.G)){
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             Gdx.input.setCursorCatched(!Gdx.input.isCursorCatched());
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             btCollisionObject obj = physicsWorld.rayTest(camera);
-            for(GameObject go : instances){
-                if(go.getBody().equals(obj)){
+            for (GameObject go : instances) {
+                if (go.getBody().equals(obj)) {
                     go.getBody().activate();
                     go.getBody().applyCentralForce(new Vector3(camera.direction).scl(70f));
                     break;
@@ -255,19 +258,28 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
-        }else if(selected == ModelList.MODEL_CYLINDER){
+        } else if (selected == ModelList.MODEL_CYLINDER) {
+            GameObject object = selectedObjects.get(selected);
+            if (object != null) {
+                selectedObject = object;
+            } else {
+                CylinderObject obj = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
+                setupPlaceHolder(obj, selected);
+                selectedObject = obj;
+            }
+        }else if(selected == ModelList.MODEL_STAIRS){
             GameObject object = selectedObjects.get(selected);
             if(object != null){
                 selectedObject = object;
             }else{
-                CylinderObject obj = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
+                StairsObject obj = new StairsObject(getModel(ModelList.MODEL_STAIRS));
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
         }
     }
 
-    private void setupPlaceHolder(GameObject obj, ModelList selected){
+    private void setupPlaceHolder(GameObject obj, ModelList selected) {
         applyAlpha(obj);
         obj.setName(selected);
         selectedObjects.put(selected, obj);
@@ -294,7 +306,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         // checks for the selected object and displays it in front of the player
         if (selectedObject != null) {
-            float dist = 5f;
+            float dist = 5f * selectedObjectZoom;
             vector3.set(camera.position.x + (camera.direction.x * dist), camera.position.y + (camera.direction.y * dist), camera.position.z + (camera.direction.z * dist));
             selectedObject.translate(vector3);
             selectedObject.transform.rotate(Vector3.X, modelListView.getModelRotation().x);
@@ -378,7 +390,6 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             ModelList select = selectedObject.getName();
 
             GameObject object = null;
-
             if (select == ModelList.MODEL_BOX) {
                 object = new BoxObject(getModel(ModelList.MODEL_BOX));
                 object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
@@ -394,12 +405,15 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             } else if (select == ModelList.MODEL_CONE) {
                 object = new ConeObject(getModel(ModelList.MODEL_CONE));
                 object.createCone(physicsWorld, 1, 2, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-            }else if(select == ModelList.MODEL_CYLINDER){
+            } else if (select == ModelList.MODEL_CYLINDER) {
                 object = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
                 object.createCylinder(physicsWorld, new Vector3(1, 1, 1), modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
+            }else if(select == ModelList.MODEL_STAIRS){
+                object = new StairsObject(getModel(ModelList.MODEL_STAIRS));
+                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }
 
-            if(object != null){
+            if (object != null) {
                 object.getBody().setWorldTransform(selectedObject.transform);
                 object.transform.set(selectedObject.transform);
                 object.setName(selectedObject.getName());
@@ -426,6 +440,13 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
+        selectedObjectZoom += (amount * 0.1);
+        if (selectedObjectZoom < 0.5f) {
+            selectedObjectZoom = 0.5f;
+        }
+        if (selectedObjectZoom > 25f) {
+            selectedObjectZoom = 25f;
+        }
         return false;
     }
 }
