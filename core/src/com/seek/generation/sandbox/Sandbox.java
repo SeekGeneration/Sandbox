@@ -354,11 +354,13 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         cameraController.update();
 
         batch.begin(camera);
-
         {
             for (int i = instances.size - 1; i >= 0; i--) {
-                batch.render(instances.get(i), environment);
+                if(isVisible(instances.get(i))){
+                    batch.render(instances.get(i), environment);
+                }
             }
+
             if (selectedObject != null) {
                 batch.render(selectedObject, environment);
             }
@@ -378,6 +380,12 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         stage.act();
         stage.draw();
 
+    }
+
+    public boolean isVisible(GameObject gameObject){
+        gameObject.transform.getTranslation(vector3);
+        vector3.add(gameObject.getCenter());
+        return camera.frustum.boundsInFrustum(vector3, gameObject.getDimensions());
     }
 
     //makes the object see through

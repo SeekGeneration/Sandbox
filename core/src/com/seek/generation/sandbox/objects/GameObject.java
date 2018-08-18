@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
@@ -21,8 +22,15 @@ public abstract class GameObject extends ModelInstance {
     private ModelList name = ModelList.NULL;
     private Vector3 inertia = new Vector3();
 
+    private final Vector3 center = new Vector3();
+    private final Vector3 dimensions = new Vector3();
+    private final BoundingBox bounds = new BoundingBox();
+
     public GameObject(Model model) {
         super(model);
+        calculateBoundingBox(bounds);
+        bounds.getCenter(center);
+        bounds.getDimensions(dimensions);
     }
 
     public void setupPhysicsBody(PhysicsWorld world, PhysicsBody body) {
@@ -144,6 +152,14 @@ public abstract class GameObject extends ModelInstance {
 
     public PhysicsBody getBody() {
         return body;
+    }
+
+    public Vector3 getCenter() {
+        return center;
+    }
+
+    public Vector3 getDimensions() {
+        return dimensions;
     }
 
     public void dispose() {
