@@ -21,10 +21,18 @@ import com.seek.generation.sandbox.ModelList;
 import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class ModelListView extends Table{
+public class ModelListView extends Table {
 
     private VisTextButton models;
     private Table rootTable, modelsTable, propertyTable;
@@ -89,16 +97,16 @@ public class ModelListView extends Table{
     }
 
     /**
-     *  @return returns the selected button
+     * @return returns the selected button
      */
-    public ModelList getSelected(){
-        if(buttonGroup.getChecked() == null){
+    public ModelList getSelected() {
+        if (buttonGroup.getChecked() == null) {
             return ModelList.NULL;
-        }else {
+        } else {
             Button button = buttonGroup.getChecked();
             ModelList type = ModelList.NULL;
-            for(ModelList t : ModelList.values()){
-                if(t.get().equals(button.getName())){
+            for (ModelList t : ModelList.values()) {
+                if (t.get().equals(button.getName())) {
                     type = t;
                     break;
                 }
@@ -109,15 +117,21 @@ public class ModelListView extends Table{
     }
 
     //updates the GUI when the loaded models change
-    public void update(final HashMap<ModelList, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera){
+    public void update(final HashMap<ModelList, Model> loadedModels, final Array<GameObject> objects, final PhysicsWorld physicsWorld, final Camera camera) {
         modelsTable.clear();
         buttonGroup.clear();
         VisTextButton clear = new VisTextButton("None");
         clear.setName("null");
         buttonGroup.add(clear);
         modelsTable.add(clear).fillX().pad(2).row();
-        for(final Map.Entry<ModelList, Model> entry : loadedModels.entrySet()){
-            final VisTextButton t = new VisTextButton(entry.getKey().get().substring(entry.getKey().get().lastIndexOf("/") +1, entry.getKey().get().lastIndexOf(".")));
+
+        HashMap<ModelList, Model> list = sort(loadedModels);
+
+        for (final Map.Entry<ModelList, Model> entry : list.entrySet()) {
+            if(!entry.getKey().isPlaceable()){
+                continue;
+            }
+            final VisTextButton t = new VisTextButton(entry.getKey().get().substring(entry.getKey().get().lastIndexOf("/") + 1, entry.getKey().get().lastIndexOf(".")));
             t.setName(entry.getKey().get());
             buttonGroup.add(t);
 //            final Model model = entry.getValue();
@@ -147,20 +161,78 @@ public class ModelListView extends Table{
         }
     }
 
-    public float getMass(){
+    String[] chars = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+
+    private HashMap<ModelList, Model> sort(HashMap<ModelList, Model> loadedModels) {
+        LinkedHashMap<ModelList, Model> results = new LinkedHashMap<ModelList, Model>();
+
+        List<ModelList> sortList = new ArrayList<ModelList>(loadedModels.keySet());
+
+        Collections.sort(sortList, new Comparator<ModelList>() {
+            @Override
+            public int compare(ModelList ml1, ModelList ml2) {
+                String s1 = ml1.get().substring(ml1.get().lastIndexOf("/") + 1, ml1.get().lastIndexOf("."));
+                String s2 = ml2.get().substring(ml2.get().lastIndexOf("/") + 1, ml2.get().lastIndexOf("."));
+                int i = s1.compareToIgnoreCase(s2);
+                return i;
+            }
+        });
+
+        results.clear();
+        for(ModelList l : sortList){
+            Model ml = loadedModels.get(l);
+            results.put(l, ml);
+        }
+
+        return results;
+
+//        for (Map.Entry<ModelList, Model> e1 : results.entrySet()) {
+//            for (Map.Entry<ModelList, Model> e2 : results.entrySet()) {
+//                System.out.println("Loop");
+//                String name1 = e1.getKey().get().substring(e1.getKey().get().lastIndexOf("/") + 1, e1.getKey().get().lastIndexOf("."));
+//                String name2 = e2.getKey().get().substring(e2.getKey().get().lastIndexOf("/") + 1, e2.getKey().get().lastIndexOf("."));
+//
+//                int char1 = -1;
+//                int char2 = -1;
+//                for (int i = 0; i < chars.length; i++) {
+//                    if (name1.startsWith(chars[i])) {
+//                        char1 = i;
+//                    }
+//
+//                    if (name2.startsWith(chars[i])) {
+//                        char2 = i;
+//                    }
+//
+//                    if (char1 != -1 && char2 != -1) {
+//                        break;
+//                    }
+//
+//                }
+//                if (char1 < char2) {
+//                    Map.Entry<ModelList, Model> tmp = e2;
+//                    e2 = e1;
+//                    e1 = tmp;
+//                    System.out.println("switch: " + e2.getKey().get() + " + " + e1.getKey().get());
+//                }
+//            }
+//        }
+//
+//        return results;
+    }
+
+    public float getMass() {
         return Float.parseFloat(massSpinner.getModel().getText());
     }
 
-    public float getFriction(){
+    public float getFriction() {
         return Float.parseFloat(frictionSpinner.getModel().getText());
     }
 
-    public float getRestitution()
-    {
+    public float getRestitution() {
         return Float.parseFloat(restitutionSpinner.getModel().getText());
     }
 
-    public Vector3 getModelRotation(){
+    public Vector3 getModelRotation() {
         rotation.set(Float.parseFloat(xRotSpinner.getModel().getText()), Float.parseFloat(yRotSpinner.getModel().getText()), Float.parseFloat(zRotSpinner.getModel().getText()));
         return rotation;
     }

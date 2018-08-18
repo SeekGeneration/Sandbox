@@ -37,6 +37,7 @@ import com.seek.generation.sandbox.objects.GameObject;
 import com.seek.generation.sandbox.objects.RustCube;
 import com.seek.generation.sandbox.objects.StairsObject;
 import com.seek.generation.sandbox.objects.TorusKnot;
+import com.seek.generation.sandbox.objects.TurbineBladesObject;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
 import com.seek.generation.sandbox.ui.ModelListView;
 
@@ -284,6 +285,15 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
+        }else if(selected == ModelList.MODEL_TURBINE_BLADES){
+            GameObject object = selectedObjects.get(selected);
+            if(object != null){
+                selectedObject = object;
+            }else{
+                TurbineBladesObject obj = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
+                setupPlaceHolder(obj, selected);
+                selectedObject = obj;
+            }
         }
     }
 
@@ -436,6 +446,10 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             }else if(select == ModelList.MODEL_STAIRS){
                 object = new StairsObject(getModel(ModelList.MODEL_STAIRS));
                 object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
+            }else if(select == ModelList.MODEL_TURBINE_BLADES){
+                object = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
+                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getMass(), modelListView.getRestitution());
+//                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }
 
             if (object != null) {
