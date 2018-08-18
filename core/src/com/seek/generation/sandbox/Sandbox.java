@@ -5,9 +5,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -22,8 +20,6 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
-import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -104,14 +100,22 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
         physicsWorld = new PhysicsWorld();
 
-        loadModel(ModelList.SKYBOX);
-        loadModel(ModelList.MODEL_FLOOR);
-        loadModel(ModelList.MODEL_BOX);
-        loadModel(ModelList.MODEL_RUST_CUBE);
-        loadModel(ModelList.MODEL_TORUS_KNOT);
-        loadModel(ModelList.MODEL_CONE);
-        loadModel(ModelList.MODEL_CYLINDER);
-        loadModel(ModelList.MODEL_STAIRS);
+//        loadModel(ModelList.SKYBOX);
+//        loadModel(ModelList.MODEL_FLOOR);
+//        loadModel(ModelList.MODEL_BOX);
+//        loadModel(ModelList.MODEL_RUST_CUBE);
+//        loadModel(ModelList.MODEL_TORUS_KNOT);
+//        loadModel(ModelList.MODEL_CONE);
+//        loadModel(ModelList.MODEL_CYLINDER);
+//        loadModel(ModelList.MODEL_STAIRS);
+
+        ModelList[] enums = ModelList.values();
+        for(ModelList m : enums){
+            if(m == ModelList.NULL){
+                continue;
+            }
+            loadModel(m);
+        }
 
         //setup UI
         stage = new Stage(Gdx.app.getType() == Application.ApplicationType.Desktop ? new ScreenViewport() : new FitViewport(1920 / 3, 1080 / 3));
