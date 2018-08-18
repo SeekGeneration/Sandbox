@@ -3,14 +3,11 @@ package com.seek.generation.sandbox;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.assets.AssetDescriptor;
-import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -103,7 +100,6 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         camera.update();
 //        cameraController.setVelocity(50);
 
-        //used to set a default texture to anything missing a texture so the application doesn't crash
         assetManager.setLoader(Texture.class, new TextureLoaderDefault(new InternalFileHandleResolver()));
 
         physicsWorld = new PhysicsWorld();
@@ -153,19 +149,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         //has finished loading then if isLoaded returns true we add it to the loaded models array
         for (Map.Entry<ModelList, Boolean> entry : modelQue.entrySet()) {
             if (entry.getValue() == false) {
-                if(entry.getKey().getFixSeams() == true)
-                {
-                    ModelLoader.ModelParameters modelParams = new ModelLoader.ModelParameters();
-                    modelParams.textureParameter.minFilter = Texture.TextureFilter.Linear;
-                    modelParams.textureParameter.magFilter = Texture.TextureFilter.Linear;
-                    modelParams.textureParameter.wrapU = Texture.TextureWrap.ClampToEdge;
-                    modelParams.textureParameter.wrapV = Texture.TextureWrap.ClampToEdge;
-                    modelParams.textureParameter.genMipMaps = true;
-                    AssetDescriptor<Model> modelDes = new AssetDescriptor<Model>(entry.getKey().get(), Model.class, modelParams);
-                    assetManager.load(modelDes);
-                }else {
-                    assetManager.load(entry.getKey().get(), Model.class);
-                }
+                assetManager.load(entry.getKey().get(), Model.class);
                 entry.setValue(true);
             } else {
                 if (assetManager.isLoaded(entry.getKey().get())) {
