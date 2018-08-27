@@ -22,6 +22,7 @@ import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.physics.bullet.softbody.btSoftBody;
+import com.badlogic.gdx.physics.bullet.softbody.btSoftBodyWorldInfo;
 import com.badlogic.gdx.physics.bullet.softbody.btSoftRigidDynamicsWorld;
 
 public class PhysicsWorld {
@@ -31,6 +32,8 @@ public class PhysicsWorld {
     private final btConstraintSolver constrainSolver;
     private final btBroadphaseInterface broadphase;
     private final btDispatcher dispatcher;
+
+    private btSoftBodyWorldInfo worldInfo;
 
     private final Vector3 tmp = new Vector3();
 
@@ -54,6 +57,11 @@ public class PhysicsWorld {
 //        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constrainSolver, collisionConfiguration);
 
         dynamicsWorld = new btSoftRigidDynamicsWorld(dispatcher, broadphase, constrainSolver, collisionConfiguration);
+
+        worldInfo = new btSoftBodyWorldInfo();
+        worldInfo.setBroadphase(broadphase);
+        worldInfo.setDispatcher(dispatcher);
+        worldInfo.getSparsesdf().Initialize();
 
         debugDrawer = new DebugDrawer();
         debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_MAX_DEBUG_DRAW_MODE);
@@ -131,8 +139,14 @@ public class PhysicsWorld {
         dynamicsWorld.setGravity(tmp);
     }
 
+    public btSoftBodyWorldInfo getWorldInfo()
+    {
+        return worldInfo;
+    }
+
     public void dispose() {
         dynamicsWorld.dispose();
+        worldInfo.dispose();
         collisionConfiguration.dispose();
         constrainSolver.dispose();
         broadphase.dispose();

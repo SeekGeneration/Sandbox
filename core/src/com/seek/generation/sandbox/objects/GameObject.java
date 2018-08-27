@@ -1,6 +1,8 @@
 package com.seek.generation.sandbox.objects;
 
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -11,14 +13,18 @@ import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btShapeHull;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.softbody.btSoftBody;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.seek.generation.sandbox.ModelList;
 import com.seek.generation.sandbox.physics.ObjectMotionState;
-import com.seek.generation.sandbox.physics.PhysicsBody;
+import com.seek.generation.sandbox.physics.PhysicsObject;
 import com.seek.generation.sandbox.physics.PhysicsWorld;
+
+import java.nio.ShortBuffer;
 
 public abstract class GameObject extends ModelInstance {
 
-    private PhysicsBody body = null;
+    private PhysicsObject physicsObject = null;
     private ModelList name = ModelList.NULL;
     private Vector3 inertia = new Vector3();
 
@@ -33,9 +39,13 @@ public abstract class GameObject extends ModelInstance {
         bounds.getDimensions(dimensions);
     }
 
-    public void setupPhysicsBody(PhysicsWorld world, PhysicsBody body) {
-        this.body = body;
-        world.addRigidBody(body);
+    public void setupPhysicsBody(PhysicsWorld world, PhysicsObject physicsObject, PhysicsObject.Type type) {
+        this.physicsObject = physicsObject;
+        if(type == PhysicsObject.Type.RIGIDBODY) {
+            world.addRigidBody((btRigidBody) physicsObject.getBody());
+        }else if(type == PhysicsObject.Type.SOFTBODY){
+            world.addSoftBody((btSoftBody)physicsObject.getBody());
+        }
     }
 
     public void setName(ModelList name) {
@@ -48,8 +58,8 @@ public abstract class GameObject extends ModelInstance {
 
     public void translate(Vector3 position) {
         transform.setToTranslation(position);
-        if (body != null) {
-            body.setWorldTransform(transform);
+        if (physicsObject != null) {
+            physicsObject.getBody().setWorldTransform(transform);
         }
     }
 
@@ -75,9 +85,9 @@ public abstract class GameObject extends ModelInstance {
         //bouncyness
         constructionInfo.setRestitution(restitution);
         constructionInfo.setFriction(friction);
-        PhysicsBody body = new PhysicsBody(constructionInfo);
+        PhysicsObject physicsObject = new PhysicsObject(constructionInfo);
 
-        setupPhysicsBody(physicsWorld, body);
+        setupPhysicsBody(physicsWorld, physicsObject, PhysicsObject.Type.RIGIDBODY);
     }
 
     public void createCone(PhysicsWorld physicsWorld, float radius, float height, float mass, float friction, float restituion) {
@@ -95,9 +105,9 @@ public abstract class GameObject extends ModelInstance {
 
         constructionInfo.setRestitution(restituion);
         constructionInfo.setFriction(friction);
-        PhysicsBody body = new PhysicsBody(constructionInfo);
+        PhysicsObject physicsObject = new PhysicsObject(constructionInfo);
 
-        setupPhysicsBody(physicsWorld, body);
+        setupPhysicsBody(physicsWorld, physicsObject, PhysicsObject.Type.RIGIDBODY);
 
     }
 
@@ -116,9 +126,9 @@ public abstract class GameObject extends ModelInstance {
         //bouncyness
         constructionInfo.setRestitution(restitution);
         constructionInfo.setFriction(friction);
-        PhysicsBody body = new PhysicsBody(constructionInfo);
+        PhysicsObject physicsObject = new PhysicsObject(constructionInfo);
 
-        setupPhysicsBody(physicsWorld, body);
+        setupPhysicsBody(physicsWorld, physicsObject, PhysicsObject.Type.RIGIDBODY);
     }
 
     public void createConvexHull(PhysicsWorld physicsWorld, float mass, float friction, float restitution) {
@@ -144,14 +154,46 @@ public abstract class GameObject extends ModelInstance {
         constructionInfo.setRestitution(restitution);
         constructionInfo.setFriction(friction);
 
-        PhysicsBody body = new PhysicsBody(constructionInfo);
-        setupPhysicsBody(physicsWorld, body);
+        PhysicsObject physicsObject = new PhysicsObject(constructionInfo);
+        setupPhysicsBody(physicsWorld, physicsObject, PhysicsObject.Type.RIGIDBODY);
 
     }
 
+    public void createSoftBody(PhysicsWorld physicsWorld, Model objectModel){
+        System.out.println(objectModel.nodes.get(0).parts.size);
+        MeshPart meshPart = objectModel.nodes.get(0).parts.get(0).meshPart;
+        meshPart.mesh.scale(6, 6, 6);
 
-    public PhysicsBody getBody() {
-        return body;
+        ShortBuffer indexMap = BufferUtils.newShortBuffer(meshPart.size);
+
+        int positionOffset = meshPart.mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset;
+        int normalOffset = meshPart.mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset;
+
+        btSoftBody softBody = new btSoftBody(physicsWorld.getWorldInfo(), meshPart.mesh.getVerticesBuffer(), meshPart.mesh.getVertexSize(), positionOffset, normalOffset, meshPart.mesh.getIndicesBuffer(), meshPart.offset, meshPart.size, indexMap, 0);
+
+        softBody.setMass(0, 0);
+
+        btSoftBody.Material pm = softBody.appendMaterial();
+        pm.setKLST(0.2f);
+        pm.setFlags(0);
+        softBody.generateBendingConstraints(2, pm);
+
+        softBody.setConfig_piterations(7);
+        softBody.setConfig_kDF(0.2f);
+        softBody.randomizeConstraints();
+        softBody.setTotalMass(1);
+
+//        physicsWorld.addSoftBody(softBody);
+
+        PhysicsObject physicsObject = new PhysicsObject(softBody);
+        setupPhysicsBody(physicsWorld, physicsObject, PhysicsObject.Type.SOFTBODY);
+//        PhysicsBody body = new PhysicsBody(softBody);
+//        setupPhysicsBody(physicsWorld, body);
+    }
+
+
+    public PhysicsObject getPhysicsObject() {
+        return physicsObject;
     }
 
     public Vector3 getCenter() {
@@ -163,8 +205,8 @@ public abstract class GameObject extends ModelInstance {
     }
 
     public void dispose() {
-        if (body != null) {
-            body.dispose();
+        if (physicsObject != null) {
+            physicsObject.dispose();
         }
     }
 }

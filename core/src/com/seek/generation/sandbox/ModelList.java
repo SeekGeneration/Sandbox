@@ -12,7 +12,8 @@ public enum ModelList {
     MODEL_CYLINDER("models/cylinder/cylinder.obj"),
     MODEL_STAIRS("models/stairs/stairs.obj"),
     //TODO fix convex hull for model blades or create an model from scratch
-    MODEL_TURBINE_BLADES("models/turbine/blades.g3db");
+    MODEL_TURBINE_BLADES("models/turbine/blades.g3db"),
+    MODEL_ICO("models/ico.g3db");
 
     String model;
     boolean isPlaceable;

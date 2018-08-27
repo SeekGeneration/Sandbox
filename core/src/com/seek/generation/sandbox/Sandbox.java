@@ -34,6 +34,7 @@ import com.seek.generation.sandbox.objects.ConeObject;
 import com.seek.generation.sandbox.objects.CylinderObject;
 import com.seek.generation.sandbox.objects.FloorObject;
 import com.seek.generation.sandbox.objects.GameObject;
+import com.seek.generation.sandbox.objects.IcoSphereObject;
 import com.seek.generation.sandbox.objects.RustCube;
 import com.seek.generation.sandbox.objects.StairsObject;
 import com.seek.generation.sandbox.objects.TorusKnot;
@@ -180,16 +181,16 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             Gdx.input.setCursorCatched(!Gdx.input.isCursorCatched());
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            btCollisionObject obj = physicsWorld.rayTest(camera);
-            for (GameObject go : instances) {
-                if (go.getBody().equals(obj)) {
-                    go.getBody().activate();
-                    go.getBody().applyCentralForce(new Vector3(camera.direction).scl(70f));
-                    break;
-                }
-            }
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+//            btCollisionObject obj = physicsWorld.rayTest(camera);
+//            for (GameObject go : instances) {
+//                if (go.getPhysicsObject().getBody().equals(obj)) {
+//                    go.getPhysicsObject().getBody().activate();
+//                    go.getPhysicsObject().getBody().applyCentralForce(new Vector3(camera.direction).scl(70f));
+//                    break;
+//                }
+//            }
+//        }
 //        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
 //            Model model = getModel(ModelList.MODEL_BOX);
 //            if (model != null) {
@@ -291,6 +292,15 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 selectedObject = object;
             }else{
                 TurbineBladesObject obj = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
+                setupPlaceHolder(obj, selected);
+                selectedObject = obj;
+            }
+        }else if(selected == ModelList.MODEL_ICO){
+            GameObject object = selectedObjects.get(selected);
+            if(object != null){
+                selectedObject = object;
+            }else{
+                IcoSphereObject obj = new IcoSphereObject(getModel(ModelList.MODEL_ICO));
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
@@ -456,12 +466,18 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }else if(select == ModelList.MODEL_TURBINE_BLADES){
                 object = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
-                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getMass(), modelListView.getRestitution());
+                object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
 //                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
+            }else if(select == ModelList.MODEL_ICO){
+                object = new IcoSphereObject(getModel(ModelList.MODEL_ICO));
+//                object.createSoftBody(physicsWorld, getModel(ModelList.MODEL_ICO));
+//                object.createSphere(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }
 
             if (object != null) {
-                object.getBody().setWorldTransform(selectedObject.transform);
+                if(object.getPhysicsObject() != null) {
+                    object.getPhysicsObject().getBody().setWorldTransform(selectedObject.transform);
+                }
                 object.transform.set(selectedObject.transform);
                 object.setName(selectedObject.getName());
                 instances.add(object);
