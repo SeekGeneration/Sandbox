@@ -159,10 +159,11 @@ public abstract class GameObject extends ModelInstance {
 
     }
 
+    //TODO fixed soft bodies not falling, fix soft bodies not transforming to the current location of the placed object
     public void createSoftBody(PhysicsWorld physicsWorld, Model objectModel){
         System.out.println(objectModel.nodes.get(0).parts.size);
         MeshPart meshPart = objectModel.nodes.get(0).parts.get(0).meshPart;
-        meshPart.mesh.scale(6, 6, 6);
+//        meshPart.mesh.scale(6, 6, 6);
 
         ShortBuffer indexMap = BufferUtils.newShortBuffer(meshPart.size);
 

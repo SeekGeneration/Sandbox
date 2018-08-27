@@ -470,13 +470,16 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 //                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }else if(select == ModelList.MODEL_ICO){
                 object = new IcoSphereObject(getModel(ModelList.MODEL_ICO));
-//                object.createSoftBody(physicsWorld, getModel(ModelList.MODEL_ICO));
+
+                //TODO fix ico model as objectModel.nodes.get(0).parts.size reutrn size of 0
+                object.createSoftBody(physicsWorld, getModel(ModelList.MODEL_RUST_CUBE));
 //                object.createSphere(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
             }
 
             if (object != null) {
                 if(object.getPhysicsObject() != null) {
-                    object.getPhysicsObject().getBody().setWorldTransform(selectedObject.transform);
+                    btCollisionObject body = object.getPhysicsObject().getBody();
+                    body.setWorldTransform(selectedObject.transform);
                 }
                 object.transform.set(selectedObject.transform);
                 object.setName(selectedObject.getName());
