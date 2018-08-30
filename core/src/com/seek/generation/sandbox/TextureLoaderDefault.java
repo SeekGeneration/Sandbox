@@ -1,5 +1,6 @@
 package com.seek.generation.sandbox;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
@@ -14,7 +15,7 @@ public class TextureLoaderDefault extends TextureLoader {
     public void loadAsync(AssetManager manager, String fileName, FileHandle file, TextureParameter parameter) {
         if(!file.exists()){
             System.out.println("Missing file: " + file);
-            file = new FileHandle("default.jpg");
+            file = Gdx.files.internal("default.jpg");
         }
 
         super.loadAsync(manager, fileName, file, parameter);
