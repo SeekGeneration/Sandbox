@@ -47,6 +47,8 @@ import java.util.Map;
 
 public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
+    private final boolean enable_editable_world = false;
+
     //graphics
     private PerspectiveCamera camera;
     private CameraController cameraController;
@@ -112,8 +114,8 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 //        loadModel(ModelList.MODEL_STAIRS);
 
         ModelList[] enums = ModelList.values();
-        for(ModelList m : enums){
-            if(m == ModelList.NULL){
+        for (ModelList m : enums) {
+            if (m == ModelList.NULL) {
                 continue;
             }
             loadModel(m);
@@ -125,7 +127,11 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         modelListView = new ModelListView();
         loadingBar = new VisProgressBar(0, 1f, 0.1f, false);
 
-        rootTable.add(modelListView).grow().align(Align.left);
+        if(enable_editable_world) {
+            rootTable.add(modelListView).grow().align(Align.left);
+        }else{
+            rootTable.add().grow().align(Align.left);
+        }
         rootTable.add(loadingBar).align(Align.bottomRight);
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
@@ -277,29 +283,29 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
-        }else if(selected == ModelList.MODEL_STAIRS){
+        } else if (selected == ModelList.MODEL_STAIRS) {
             GameObject object = selectedObjects.get(selected);
-            if(object != null){
+            if (object != null) {
                 selectedObject = object;
-            }else{
+            } else {
                 StairsObject obj = new StairsObject(getModel(ModelList.MODEL_STAIRS));
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
-        }else if(selected == ModelList.MODEL_TURBINE_BLADES){
+        } else if (selected == ModelList.MODEL_TURBINE_BLADES) {
             GameObject object = selectedObjects.get(selected);
-            if(object != null){
+            if (object != null) {
                 selectedObject = object;
-            }else{
+            } else {
                 TurbineBladesObject obj = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
             }
-        }else if(selected == ModelList.MODEL_ICO){
+        } else if (selected == ModelList.MODEL_ICO) {
             GameObject object = selectedObjects.get(selected);
-            if(object != null){
+            if (object != null) {
                 selectedObject = object;
-            }else{
+            } else {
                 IcoSphereObject obj = new IcoSphereObject(getModel(ModelList.MODEL_ICO));
                 setupPlaceHolder(obj, selected);
                 selectedObject = obj;
@@ -343,9 +349,9 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         }
 
         //create the skybox
-        if(skybox == null){
+        if (skybox == null) {
             Model model = getModel(ModelList.SKYBOX);
-            if(model != null){
+            if (model != null) {
                 skybox = new Skybox(model);
 //                instances.add(skybox);
             }
@@ -366,7 +372,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
         batch.begin(camera);
         {
             for (int i = instances.size - 1; i >= 0; i--) {
-                if(isVisible(instances.get(i))){
+                if (isVisible(instances.get(i))) {
                     batch.render(instances.get(i), environment);
                 }
             }
@@ -375,7 +381,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
                 batch.render(selectedObject, environment);
             }
 
-            if(skybox != null){
+            if (skybox != null) {
 //                skybox.transform = camera.combined;
                 skybox.transform.setToTranslation(camera.position);
                 float scale = camera.far - (camera.far * 0.5f);
@@ -392,7 +398,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
     }
 
-    public boolean isVisible(GameObject gameObject){
+    public boolean isVisible(GameObject gameObject) {
         gameObject.transform.getTranslation(vector3);
         vector3.add(gameObject.getCenter());
         return camera.frustum.boundsInFrustum(vector3, gameObject.getDimensions());
@@ -461,14 +467,14 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             } else if (select == ModelList.MODEL_CYLINDER) {
                 object = new CylinderObject(getModel(ModelList.MODEL_CYLINDER));
                 object.createCylinder(physicsWorld, new Vector3(1, 1, 1), modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-            }else if(select == ModelList.MODEL_STAIRS){
+            } else if (select == ModelList.MODEL_STAIRS) {
                 object = new StairsObject(getModel(ModelList.MODEL_STAIRS));
                 object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-            }else if(select == ModelList.MODEL_TURBINE_BLADES){
+            } else if (select == ModelList.MODEL_TURBINE_BLADES) {
                 object = new TurbineBladesObject(getModel(ModelList.MODEL_TURBINE_BLADES));
                 object.createAABB(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
 //                object.createConvexHull(physicsWorld, modelListView.getMass(), modelListView.getFriction(), modelListView.getRestitution());
-            }else if(select == ModelList.MODEL_ICO){
+            } else if (select == ModelList.MODEL_ICO) {
                 object = new IcoSphereObject(getModel(ModelList.MODEL_ICO));
 
                 //TODO fix ico model as objectModel.nodes.get(0).parts.size reutrn size of 0
@@ -477,7 +483,7 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
             }
 
             if (object != null) {
-                if(object.getPhysicsObject() != null) {
+                if (object.getPhysicsObject() != null) {
                     btCollisionObject body = object.getPhysicsObject().getBody();
                     body.setWorldTransform(selectedObject.transform);
                 }
