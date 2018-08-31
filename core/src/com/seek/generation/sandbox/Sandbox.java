@@ -47,7 +47,7 @@ import java.util.Map;
 
 public class Sandbox extends ApplicationAdapter implements InputProcessor {
 
-    private final boolean enable_editable_world = false;
+    private final boolean enable_editable_world;
 
     //graphics
     private PerspectiveCamera camera;
@@ -78,6 +78,10 @@ public class Sandbox extends ApplicationAdapter implements InputProcessor {
     private Table rootTable;
     private ModelListView modelListView;
     private VisProgressBar loadingBar;
+
+    public Sandbox(boolean enable_editable_world){
+        this.enable_editable_world = enable_editable_world;
+    }
 
     @Override
     public void create() {
