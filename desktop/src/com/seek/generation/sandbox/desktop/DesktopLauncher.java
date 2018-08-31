@@ -7,6 +7,6 @@ import com.seek.generation.sandbox.Sandbox;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new Sandbox(), config);
+		new LwjglApplication(new Sandbox(true), config);
 	}
 }
